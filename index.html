@@ -141,10 +141,14 @@
 
         <!-- Status do Salvamento no Navegador e Ação Rápida -->
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div id="sync-status-badge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300" title="Todos os dados são salvos automaticamente no navegador (localStorage)">
+          <div id="sync-status-badge" class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300" title="Todos os dados são salvos automaticamente no navegador (localStorage)">
             <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span id="sync-text" class="font-mono text-[11px]">Salvo no Navegador</span>
           </div>
+          <button onclick="openApiKeyModal()" id="btn-api-key-status" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px] transition" title="Configure sua chave gratuita do Google Gemini para ativar IA ao vivo no Live Server / navegador local">
+            <span id="api-key-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span class="hidden md:inline" id="api-key-label">API IA</span>
+          </button>
           <button onclick="switchTab('market')" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 font-semibold text-xs transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             Google Finanças
@@ -554,7 +558,12 @@
 
           <div class="flex flex-wrap items-center gap-3">
             <div class="text-left lg:text-right pr-2">
-              <div id="ma-price" class="text-2xl font-extrabold font-mono text-white">R$ 38,45</div>
+              <div class="flex items-center lg:justify-end gap-1.5">
+                <div id="ma-price" class="text-2xl font-extrabold font-mono text-white">R$ 38,45</div>
+                <button onclick="openQuickPriceModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition" title="Ajustar preço atual manualmente">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+              </div>
               <div id="ma-changes" class="text-xs font-mono text-emerald-400">Hoje: +1,42% • 30d: +6,10%</div>
             </div>
             <a id="ma-gf-link" href="https://www.google.com/finance/quote/PETR4:BVMF" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
@@ -1257,57 +1266,81 @@
   </div>
 
   <!-- ======================================================================= -->
+  <!-- MODAL 6: AJUSTAR PREÇO ATUAL DO ATIVO MANUALMENTE                       -->
+  <!-- ======================================================================= -->
+  <div id="price-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-sky-500/40 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">Ajustar Cotação Atual</h3>
+          <p id="price-modal-subtitle" class="text-xs text-slate-400 mt-0.5">Recalcula suporte, resistência e projeção futura</p>
+        </div>
+        <button onclick="closeQuickPriceModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+      </div>
+      <div class="space-y-3">
+        <div class="space-y-1">
+          <label class="block text-xs font-medium text-slate-300">Preço Atual (R$ / US$)</label>
+          <input id="quick-price-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-sm font-mono text-white outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-slate-300">Variação Hoje (%)</label>
+            <input id="quick-day-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+          </div>
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-slate-300">Dividend Yield (%)</label>
+            <input id="quick-dy-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeQuickPriceModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+        <button onclick="saveQuickPriceModal()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-xs font-bold text-slate-950 transition">Aplicar Cotação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 7: CONFIGURAR CHAVE API GEMINI (USO LOCAL / LIVE SERVER)          -->
+  <!-- ======================================================================= -->
+  <div id="apikey-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-emerald-500/40 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold mb-1">
+            MOTOR IA & GOOGLE SEARCH AO VIVO
+          </span>
+          <h3 class="text-base font-bold text-white">Configurar Chave API do Google Gemini</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Opcional para uso local (Live Server). Sem chave, o sistema usa cotações diretas (Brapi/BCB/Câmbio) e heurística local.</p>
+        </div>
+        <button onclick="closeApiKeyModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+      </div>
+      <div class="space-y-2">
+        <label class="block text-xs font-medium text-slate-300">Gemini API Key (salva apenas no seu navegador)</label>
+        <input id="gemini-apikey-input" type="password" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2.5 text-xs font-mono text-white outline-none" />
+        <p class="text-[11px] text-slate-400">
+          Você pode gerar uma chave gratuita no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Google AI Studio</a>.
+        </p>
+      </div>
+      <div class="flex items-center justify-between gap-2 pt-2">
+        <button onclick="clearGeminiApiKey()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition">Limpar Chave</button>
+        <div class="flex gap-2">
+          <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+          <button onclick="saveGeminiApiKey()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-bold text-slate-950 transition">Salvar Chave</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
   <!-- LÓGICA PRINCIPAL: CALENDÁRIO DINÂMICO, LOCALSTORAGE, IA & CHART.JS      -->
   <!-- ======================================================================= -->
   <script>
     // =========================================================================
-    // 1. UTILITÁRIOS DE DATA (SEM PROBLEMA DE FUSO HORÁRIO UTC)
+    // 1. CONSTANTES, ESTADO GLOBAL & CHART INSTANCES
     // =========================================================================
-    function toDateStr(dateObj) {
-      const y = dateObj.getFullYear();
-      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const d = String(dateObj.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-
-    function parseDateStr(str) {
-      if (!str || typeof str !== 'string') return new Date();
-      const [y, m, d] = str.split('-').map(Number);
-      return new Date(y, (m || 1) - 1, d || 1);
-    }
-
-    function getTodayStr() {
-      return toDateStr(new Date());
-    }
-
-    function addDays(dateStr, days) {
-      const dt = parseDateStr(dateStr);
-      dt.setDate(dt.getDate() + days);
-      return toDateStr(dt);
-    }
-
-    function diffDays(dateStrA, dateStrB) {
-      const a = parseDateStr(dateStrA);
-      const b = parseDateStr(dateStrB);
-      return Math.round((b - a) / (1000 * 60 * 60 * 24));
-    }
-
-    function formatDateBR(dateStr) {
-      if (!dateStr) return '--/--/----';
-      const [y, m, d] = dateStr.split('-');
-      return `${d}/${m}/${y}`;
-    }
-
-    function formatDateShort(dateStr) {
-      if (!dateStr) return '--/--';
-      const [, m, d] = dateStr.split('-');
-      return `${d}/${m}`;
-    }
-
-    // =========================================================================
-    // 2. CONSTANTES, CREDIBILIDADE E ESTADO GLOBAL
-    // =========================================================================
-    const STORAGE_KEY = 'pulsequant_browser_db_v2';
+    const STORAGE_KEY = 'pulsequant_terminal_state_v2';
+    const API_KEY_STORAGE = 'pulsequant_gemini_apikey_v1';
 
     const CREDIBILITY_MAP = {
       official: { label: 'Oficial / Regulador', score: 95, color: 'emerald' },
@@ -1318,35 +1351,8 @@
 
     const RISK_PROFILE_FACTORS = {
       Conservador: 1.15,
-      Moderado: 1.0,
+      Moderado: 1.00,
       Agressivo: 0.88
-    };
-
-    const state = {
-      activeTab: 'dashboard',
-      horizonFilter: 'Todos',
-      selectedSignalKey: null,
-      calendarViewYear: new Date().getFullYear(),
-      calendarViewMonth: new Date().getMonth(), // 0..11
-      lastSavedAt: null,
-      selectedMarketTicker: 'PETR4',
-      marketHistoryRange: '90D',
-      marketProjHorizon: 30,
-      autoCollect: {
-        topic: 'Mercado Financeiro Brasil, B3, Google Finanças e Ibovespa',
-        intervalMinutes: 0,
-        lastCollectedAt: null
-      },
-      macroIndicators: [],
-      marketAssets: [],
-      calibration: {
-        wCred: 35,
-        wSent: 35,
-        wMacro: 30,
-        riskProfile: 'Moderado'
-      },
-      analyses: [],
-      feedItems: []
     };
 
     let decayChartInstance = null;
@@ -1354,458 +1360,114 @@
     let assetProjectionChartInstance = null;
     let autoCollectTimerId = null;
 
-    // Indicadores macro iniciais (podem ser atualizados ao vivo via Google Finanças)
-    function createInitialMacroIndicators() {
-      return [
-        { symbol: 'IBOV', label: 'IBOVESPA', value: '132.480', changePct: +0.84, source: 'B3' },
-        { symbol: 'IFIX', label: 'IFIX', value: '3.392', changePct: +0.32, source: 'FIIs' },
-        { symbol: 'USDBRL', label: 'DÓLAR', value: 'R$ 5,74', changePct: -0.45, source: 'FX' },
-        { symbol: 'SELIC', label: 'SELIC META', value: '11,25% a.a.', changePct: 0.0, source: 'BCB' },
-        { symbol: 'SPX', label: 'S&P 500', value: '6.012', changePct: +0.61, source: 'NYSE' },
-        { symbol: 'BTC', label: 'BITCOIN', value: 'US$ 94.200', changePct: +2.15, source: 'Cripto' }
-      ];
+    const nowDateObj = new Date();
+    const state = {
+      activeTab: 'dashboard',
+      horizonFilter: 'Todos',
+      selectedSignalKey: null,
+      selectedMarketTicker: 'PETR4',
+      marketHistoryRange: '90D',
+      marketProjHorizon: 30,
+      calendarViewYear: nowDateObj.getFullYear(),
+      calendarViewMonth: nowDateObj.getMonth(),
+      calibration: {
+        wCred: 35,
+        wSent: 35,
+        wMacro: 30,
+        riskProfile: 'Moderado'
+      },
+      autoCollect: {
+        topic: 'Mercado Financeiro Brasil, B3, Google Finanças e Ibovespa',
+        intervalMinutes: 0,
+        lastCollectedAt: null
+      },
+      macroIndicators: [],
+      marketAssets: [],
+      analyses: [],
+      feedItems: []
+    };
+
+    // =========================================================================
+    // 2. UTILITÁRIOS DE DATA, FORMATAÇÃO E NOTIFICAÇÕES TOAST
+    // =========================================================================
+    function getTodayStr() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
 
-    // Gera série histórica realista determinística para exibição inicial / fallback
-    function generateHistoricalSeries(currentPrice, change30dPct, annualVolPct, days = 252, seedStr = 'PETR4') {
-      let seed = 0;
-      for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) % 99991;
-      const rand = () => {
-        seed = (seed * 1664525 + 1013904223) % 4294967296;
-        return seed / 4294967296;
-      };
-
-      const dailyVol = (annualVolPct / 100) / Math.sqrt(252);
-      const prices = new Array(days);
-      prices[days - 1] = currentPrice;
-
-      // Retrocede do preço atual para trás
-      const target30dPrice = currentPrice / (1 + (change30dPct / 100));
-      const driftPerDay = (Math.log(currentPrice / target30dPrice)) / 30;
-
-      for (let i = days - 2; i >= 0; i--) {
-        const shock = (rand() - 0.5) * 2.1 * dailyVol;
-        const prev = prices[i + 1] / Math.exp(driftPerDay * 0.45 + shock);
-        prices[i] = Math.max(0.5, Number(prev.toFixed(2)));
-      }
-      return prices;
+    function parseDateStr(str) {
+      if (!str || typeof str !== 'string') return new Date();
+      const parts = str.split('-').map(Number);
+      if (parts.length !== 3 || parts.some(isNaN)) return new Date();
+      return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
     }
 
-    // Base inicial rica de Ações B3, FIIs, ETFs, BDRs, Fundos/Renda Fixa e Cripto
-    function createInitialMarketAssets() {
-      const baseList = [
-        {
-          ticker: 'PETR4', gfSymbol: 'PETR4:BVMF', name: 'Petrobras PN', assetClass: 'Ação B3', sector: 'Petróleo & Energia',
-          currency: 'R$', price: 38.45, changeDay: 1.42, change30d: 6.1, change12m: 18.4,
-          dy: 14.2, plOrPvpLabel: 'P/L', plOrPvp: 4.9, min52w: 32.10, max52w: 42.90,
-          volatility: 28, rsi: 57, beta: 1.12, liquidity: 'R$ 1,45 bi/dia', riskLevel: 'Moderado',
-          bias: 'Compra', score: 86, support: 36.20, resistance: 41.50,
-          summary: 'Forte geração de caixa no pré-sal, Brent resiliente e dividend yield elevado sustentam assimetria positiva.',
-          recentNews: ['Distribuição extraordinária de dividendos reforça fluxo comprador no curto prazo.', 'Produção no pré-sal atinge novo recorde trimestral.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'VALE3', gfSymbol: 'VALE3:BVMF', name: 'Vale ON', assetClass: 'Ação B3', sector: 'Mineração & Indústria',
-          currency: 'R$', price: 62.80, changeDay: 0.95, change30d: 4.8, change12m: -5.2,
-          dy: 9.8, plOrPvpLabel: 'P/L', plOrPvp: 6.1, min52w: 55.40, max52w: 71.20,
-          volatility: 31, rsi: 54, beta: 1.08, liquidity: 'R$ 1,18 bi/dia', riskLevel: 'Alto',
-          bias: 'Compra', score: 81, support: 59.00, resistance: 67.40,
-          summary: 'Sensível aos estímulos de infraestrutura na China e cotação do minério de ferro em Dalian.',
-          recentNews: ['Pacote chinês de crédito impulsiona minério de ferro na Ásia.', 'Acordo definitivo de reparação reduz incerteza jurídica.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'ITUB4', gfSymbol: 'ITUB4:BVMF', name: 'Itaú Unibanco PN', assetClass: 'Ação B3', sector: 'Bancos & Financeiro',
-          currency: 'R$', price: 35.90, changeDay: 0.62, change30d: 3.4, change12m: 21.6,
-          dy: 7.4, plOrPvpLabel: 'P/L', plOrPvp: 8.6, min52w: 29.80, max52w: 37.50,
-          volatility: 21, rsi: 61, beta: 0.88, liquidity: 'R$ 920 mi/dia', riskLevel: 'Baixo',
-          bias: 'Compra', score: 84, support: 34.10, resistance: 38.20,
-          summary: 'ROE consistente acima de 21%, inadimplência controlada e beneficiado por juros elevados por mais tempo.',
-          recentNews: ['Lucro recorrente supera consenso com expansão na carteira de crédito.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'BBAS3', gfSymbol: 'BBAS3:BVMF', name: 'Banco do Brasil ON', assetClass: 'Ação B3', sector: 'Bancos & Financeiro',
-          currency: 'R$', price: 27.65, changeDay: 0.35, change30d: 2.1, change12m: 14.0,
-          dy: 10.6, plOrPvpLabel: 'P/L', plOrPvp: 4.3, min52w: 24.90, max52w: 29.80,
-          volatility: 23, rsi: 51, beta: 0.94, liquidity: 'R$ 540 mi/dia', riskLevel: 'Moderado',
-          bias: 'Compra', score: 82, support: 26.20, resistance: 29.50,
-          summary: 'Valuation descontado frente aos pares privados com forte carteira do agronegócio e payout atrativo.',
-          recentNews: ['Banco mantém guidance de lucro anual e anuncia novo JCP trimestral.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'WEGE3', gfSymbol: 'WEGE3:BVMF', name: 'WEG ON', assetClass: 'Ação B3', sector: 'Mineração & Indústria',
-          currency: 'R$', price: 54.10, changeDay: -0.40, change30d: 7.9, change12m: 44.2,
-          dy: 1.6, plOrPvpLabel: 'P/L', plOrPvp: 36.5, min52w: 35.10, max52w: 56.80,
-          volatility: 25, rsi: 68, beta: 0.72, liquidity: 'R$ 410 mi/dia', riskLevel: 'Moderado',
-          bias: 'Neutro', score: 75, support: 50.80, resistance: 57.50,
-          summary: 'Receita dolarizada e demanda global por transformadores de energia/data centers; múltiplo esticado sugere aguardar recuo.',
-          recentNews: ['Expansão de capacidade na América do Norte impulsiona carteira de pedidos.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'MXRF11', gfSymbol: 'MXRF11:BVMF', name: 'Maxi Renda FII (Papel)', assetClass: 'FII', sector: 'Imobiliário',
-          currency: 'R$', price: 9.88, changeDay: 0.20, change30d: 1.5, change12m: 4.2,
-          dy: 12.1, plOrPvpLabel: 'P/VP', plOrPvp: 1.01, min52w: 9.35, max52w: 10.65,
-          volatility: 11, rsi: 49, beta: 0.35, liquidity: 'R$ 14 mi/dia', riskLevel: 'Baixo',
-          bias: 'Compra', score: 83, support: 9.60, resistance: 10.35,
-          summary: 'Fundo de papel híbrido com alta liquidez e rendimentos mensais isentos indexados ao CDI e IPCA.',
-          recentNews: ['Selic restritiva mantém rendimentos de CRIs em patamar elevado.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'HGLG11', gfSymbol: 'HGLG11:BVMF', name: 'Pátria Logística FII (Tijolo)', assetClass: 'FII', sector: 'Imobiliário',
-          currency: 'R$', price: 158.40, changeDay: -0.15, change30d: -1.8, change12m: -2.4,
-          dy: 8.4, plOrPvpLabel: 'P/VP', plOrPvp: 0.96, min52w: 151.00, max52w: 169.50,
-          volatility: 13, rsi: 42, beta: 0.42, liquidity: 'R$ 11 mi/dia', riskLevel: 'Baixo',
-          bias: 'Compra', score: 79, support: 153.50, resistance: 165.00,
-          summary: 'Portfólio logístico AAA negociando abaixo do valor patrimonial (P/VP < 1) com vacância historicamente baixa.',
-          recentNews: ['Novos contratos atípicos de galpões logísticos elevam previsibilidade de receita.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'KNCR11', gfSymbol: 'KNCR11:BVMF', name: 'Kinea Rendimentos FII (CDI)', assetClass: 'FII', sector: 'Imobiliário',
-          currency: 'R$', price: 103.50, changeDay: 0.18, change30d: 1.2, change12m: 8.6,
-          dy: 11.5, plOrPvpLabel: 'P/VP', plOrPvp: 1.02, min52w: 99.80, max52w: 106.20,
-          volatility: 8, rsi: 55, beta: 0.22, liquidity: 'R$ 12 mi/dia', riskLevel: 'Baixo',
-          bias: 'Compra', score: 85, support: 101.20, resistance: 105.80,
-          summary: 'Carteira defensiva majoritariamente atrelada ao CDI+, se beneficia diretamente da ata hawkish do Copom.',
-          recentNews: ['Manutenção de juros altos amplia dividendos mensais distribuídos aos cotistas.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'IVVB11', gfSymbol: 'IVVB11:BVMF', name: 'iShares S&P 500 ETF (B3)', assetClass: 'ETF', sector: 'Índices & Macro',
-          currency: 'R$', price: 372.20, changeDay: 0.78, change30d: 5.4, change12m: 38.5,
-          dy: 0.0, plOrPvpLabel: 'P/L', plOrPvp: 24.8, min52w: 268.00, max52w: 381.00,
-          volatility: 19, rsi: 63, beta: 0.85, liquidity: 'R$ 135 mi/dia', riskLevel: 'Moderado',
-          bias: 'Compra', score: 84, support: 356.00, resistance: 388.00,
-          summary: 'Exposição direta às 500 maiores empresas dos EUA + proteção cambial em dólar.',
-          recentNews: ['Resultados fortes de big techs e dólar firme sustentam tendência de alta do ETF.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'BOVA11', gfSymbol: 'BOVA11:BVMF', name: 'iShares Ibovespa ETF', assetClass: 'ETF', sector: 'Índices & Macro',
-          currency: 'R$', price: 129.10, changeDay: 0.80, change30d: 1.4, change12m: 4.5,
-          dy: 0.0, plOrPvpLabel: 'P/L', plOrPvp: 8.9, min52w: 117.50, max52w: 134.80,
-          volatility: 20, rsi: 52, beta: 1.00, liquidity: 'R$ 490 mi/dia', riskLevel: 'Moderado',
-          bias: 'Neutro', score: 70, support: 124.50, resistance: 134.00,
-          summary: 'Múltiplo P/L historicamente descontado, porém limitado no curto prazo pelo risco fiscal e juros futuros.',
-          recentNews: ['Fluxo estrangeiro oscila aguardando definição do pacote fiscal doméstico.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'NVDC34', gfSymbol: 'NVDC34:BVMF', name: 'NVIDIA Corp BDR (NVDA)', assetClass: 'BDR / Global', sector: 'Tecnologia & IA',
-          currency: 'R$', price: 17.85, changeDay: 2.10, change30d: 11.4, change12m: 125.0,
-          dy: 0.03, plOrPvpLabel: 'P/L', plOrPvp: 48.2, min52w: 7.40, max52w: 18.90,
-          volatility: 46, rsi: 69, beta: 1.68, liquidity: 'R$ 160 mi/dia', riskLevel: 'Alto',
-          bias: 'Compra', score: 80, support: 16.20, resistance: 19.60,
-          summary: 'Líder absoluta em GPUs para Inteligência Artificial; forte crescimento de receita com alta volatilidade.',
-          recentNews: ['Demanda global por infraestrutura de IA mantém margens recordes em data centers.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'Tesouro IPCA+ 2029', gfSymbol: 'BRL:USD', name: 'Tesouro IPCA+ 2029 (NTN-B)', assetClass: 'Fundo / RF', sector: 'Soberano & Crédito',
-          currency: 'R$', price: 3285.00, changeDay: 0.12, change30d: 1.9, change12m: 11.2,
-          dy: 6.85, plOrPvpLabel: 'Taxa Real', plOrPvp: 6.85, min52w: 3010.00, max52w: 3340.00,
-          volatility: 7, rsi: 46, beta: 0.15, liquidity: 'Liquidez D+1', riskLevel: 'Baixo',
-          bias: 'Compra', score: 90, support: 3180.00, resistance: 3420.00,
-          summary: 'Juro real próximo de IPCA + 6,85% a.a. oferece excelente assimetria de proteção contra inflação e ganho de marcação.',
-          recentNews: ['Ata do Copom reforça prêmio elevado nos vértices intermediários de juros reais.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        },
-        {
-          ticker: 'HASH11', gfSymbol: 'HASH11:BVMF', name: 'Hashdex Nasdaq Crypto ETF (BTC)', assetClass: 'Cripto', sector: 'Criptoativos',
-          currency: 'R$', price: 51.40, changeDay: 2.35, change30d: 14.8, change12m: 96.0,
-          dy: 0.0, plOrPvpLabel: 'Vol 30d', plOrPvp: 58.0, min52w: 24.10, max52w: 55.20,
-          volatility: 62, rsi: 72, beta: 2.10, liquidity: 'R$ 85 mi/dia', riskLevel: 'Especulativo',
-          bias: 'Cautela/Venda', score: 66, support: 46.50, resistance: 56.00,
-          summary: 'Momentum forte puxado por ETFs spot de Bitcoin, mas RSI acima de 70 sinaliza risco elevado de realização.',
-          recentNews: ['Fluxo institucional em ETFs de Bitcoin renova máximas e eleva volatilidade implícita.'],
-          dataSource: 'Radar Local', updatedAt: new Date().toISOString(), citations: []
-        }
-      ];
-
-      return baseList.map((a) => ({
-        ...a,
-        history252: generateHistoricalSeries(a.price, a.change30d, a.volatility, 252, a.ticker)
-      }));
+    function addDays(dateStr, days) {
+      const dt = parseDateStr(dateStr);
+      dt.setDate(dt.getDate() + Number(days || 0));
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, '0');
+      const d = String(dt.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
-    // Agenda Macro / Eventos de Alto Impacto (dinâmica a partir da data atual)
-    function createEconomicEvents() {
-      const today = getTodayStr();
-      return [
-        { date: addDays(today, 2), title: 'Divulgação IPCA-15 (IBGE)', impact: 'Alto', assets: 'Tesouro IPCA+, FIIs Papel, BOVA11', note: 'Surpresa acima do consenso pressiona curva de juros e beneficia títulos indexados.' },
-        { date: addDays(today, 5), title: 'Payroll & Desemprego EUA', impact: 'Alto', assets: 'USDBRL, IVVB11, NVDC34, BTC', note: 'Mercado de trabalho forte nos EUA tende a fortalecer o dólar e adiar cortes do Fed.' },
-        { date: addDays(today, 9), title: 'Reunião do Copom (Taxa Selic)', impact: 'Crítico', assets: 'Bancos, FIIs, Small Caps, Renda Fixa', note: 'Principal gatilho doméstico. Alta volatilidade nas 48h ao redor do comunicado.' },
-        { date: addDays(today, 14), title: 'Data-Com Mensal (FIIs)', impact: 'Moderado', assets: 'MXRF11, HGLG11, KNCR11', note: 'Fluxo comprador típico nos 3 dias que antecedem o anúncio de dividendos.' }
-      ];
+    function diffDays(startStr, endStr) {
+      const a = parseDateStr(startStr);
+      const b = parseDateStr(endStr);
+      return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
     }
 
-    // Cria dados iniciais ancorados no DIA ATUAL do navegador para que o calendário seja imediatamente útil
-    function createInitialAnalyses() {
-      const today = getTodayStr();
-      return [
-        {
-          id: 'anl-init-2',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(),
-          source: 'CVM — Fato Relevante',
-          credibilityKey: 'official',
-          url: 'https://www.gov.br/cvm',
-          title: 'Petrobras aprova distribuição extraordinária de dividendos após geração recorde de caixa',
-          content: 'Anúncio oficial na CVM confirma proventos extraordinários sustentados pelo pré-sal e Brent firme.',
-          engine: 'IA Probabilística',
-          influenceScore: 87,
-          sentimentScore: 76,
-          macroImpactScore: 82,
-          impactDurationLabel: '3 a 8 dias úteis (até Data-Com)',
-          impactDecayCurve: [92, 84, 72, 58, 41, 28, 18],
-          summary: 'Fato relevante oficial gera forte atração de fluxo comprador para captura de dividend yield no curtíssimo prazo.',
-          recommendations: [
-            {
-              asset: 'PETR4',
-              sector: 'Petróleo & Gás',
-              horizon: 'Diário',
-              action: 'COMPRAR / ENTRAR',
-              entryWindow: 'Janela verde ativa (até amanhã)',
-              liquidationTerm: '4 a 7 dias (antes da data-ex)',
-              riskLevel: 'Moderado',
-              baseLossProbability: 29,
-              lossProbability: 26,
-              gainProbability: 74,
-              scenarios: { optimistic: 46, base: 28, pessimistic: 26 },
-              rationale: 'Dividendos extraordinários historicamente geram repricing rápido; entrar nos dias verdes minimiza risco de comprar no topo.',
-              schedule: {
-                buyStartDate: addDays(today, -1),
-                buyEndDate: addDays(today, 1),
-                sellTargetDate: addDays(today, 5),
-                sellLimitDate: addDays(today, 8)
-              },
-              userTrade: {
-                buyDate: addDays(today, -1),
-                buyPrice: 37.80,
-                investedAmount: 1500,
-                sellDate: '',
-                sellPrice: null,
-                notes: 'Entrada no Dia 1 da janela verde após divulgação na CVM.'
-              },
-              feedback: { status: 'Pendente', actualReturn: null, notes: '' }
-            }
-          ]
-        },
-        {
-          id: 'anl-init-3',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-          source: 'Valor Econômico',
-          credibilityKey: 'tier1',
-          url: 'https://valor.globo.com',
-          title: 'China anuncia pacote de estímulo à infraestrutura e minério de ferro dispara em Dalian',
-          content: 'Linhas de crédito chinesas elevam demanda projetada por aço e puxam futuros de minério em mais de 4,5%.',
-          engine: 'IA Probabilística',
-          influenceScore: 82,
-          sentimentScore: 68,
-          macroImpactScore: 86,
-          impactDurationLabel: '1 a 3 semanas',
-          impactDecayCurve: [88, 82, 74, 65, 52, 39, 27],
-          summary: 'Estímulo chinês impacta diretamente exportadoras brasileiras de commodities metálicas, com efeito imediato no swing trade.',
-          recommendations: [
-            {
-              asset: 'VALE3',
-              sector: 'Mineração & Siderurgia',
-              horizon: 'Semanal',
-              action: 'COMPRAR / ENTRAR',
-              entryWindow: 'Janela verde encerrada há 1 dia (risco crescente)',
-              liquidationTerm: '7 a 12 dias',
-              riskLevel: 'Alto',
-              baseLossProbability: 36,
-              lossProbability: 33,
-              gainProbability: 67,
-              scenarios: { optimistic: 39, base: 28, pessimistic: 33 },
-              rationale: 'Forte correlação com o minério de ferro em Dalian; após a janela verde o risco de entrada tardia aumenta gradualmente.',
-              schedule: {
-                buyStartDate: addDays(today, -4),
-                buyEndDate: addDays(today, -1),
-                sellTargetDate: addDays(today, 6),
-                sellLimitDate: addDays(today, 10)
-              },
-              userTrade: {
-                buyDate: addDays(today, -3),
-                buyPrice: 61.20,
-                investedAmount: 2000,
-                sellDate: today,
-                sellPrice: 63.45,
-                notes: 'Entrada na zona verde e realização parcial com lucro.'
-              },
-              feedback: { status: 'Acertou', actualReturn: 3.68, notes: 'Entrada no período verde garantiu margem confortável antes da resistência.' }
-            }
-          ]
-        },
-        {
-          id: 'anl-init-1',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-          source: 'Banco Central (Copom)',
-          credibilityKey: 'official',
-          url: 'https://www.bcb.gov.br/controleinflacao/historicotaxasjuros',
-          title: 'Ata do Copom sinaliza cautela fiscal e mantém juros restritivos por período prolongado',
-          content: 'O Comitê de Política Monetária destacou que a desancoragem das expectativas de inflação exige postura contracionista firme.',
-          engine: 'IA Probabilística',
-          influenceScore: 89,
-          sentimentScore: -28,
-          macroImpactScore: 94,
-          impactDurationLabel: '4 a 8 semanas (Curva de Juros)',
-          impactDecayCurve: [95, 88, 79, 70, 62, 50, 40],
-          summary: 'Comunicação oficial hawkish favorece renda fixa indexada à inflação e pós-fixada, enquanto pressiona múltiplos de ações domésticas.',
-          recommendations: [
-            {
-              asset: 'Tesouro IPCA+ 2029',
-              sector: 'Renda Fixa / Soberano',
-              horizon: 'Mensal',
-              action: 'COMPRAR / ENTRAR',
-              entryWindow: 'Hoje é o Dia 1 da janela verde (6 dias úteis)',
-              liquidationTerm: '25 a 35 dias (ou carregamento)',
-              riskLevel: 'Baixo',
-              baseLossProbability: 18,
-              lossProbability: 16,
-              gainProbability: 84,
-              scenarios: { optimistic: 42, base: 42, pessimistic: 16 },
-              rationale: 'Juros reais elevados oferecem prêmio atrativo com baixa probabilidade de perda nominal em horizonte mensal.',
-              schedule: {
-                buyStartDate: today,
-                buyEndDate: addDays(today, 5),
-                sellTargetDate: addDays(today, 22),
-                sellLimitDate: addDays(today, 30)
-              },
-              userTrade: null,
-              feedback: { status: 'Acertou', actualReturn: 3.4, notes: 'Taxas reais cederam após estabilização fiscal.' }
-            },
-            {
-              asset: 'BOVA11',
-              sector: 'Índice Brasil (Ibovespa)',
-              horizon: 'Semanal',
-              action: 'PROTEGER (HEDGE)',
-              entryWindow: 'Abertura semanal (até +2 dias)',
-              liquidationTerm: '9 a 14 dias',
-              riskLevel: 'Moderado',
-              baseLossProbability: 46,
-              lossProbability: 42,
-              gainProbability: 58,
-              scenarios: { optimistic: 22, base: 36, pessimistic: 42 },
-              rationale: 'Juros altos por mais tempo reduzem fluxo para renda variável doméstica no curto e médio prazo.',
-              schedule: {
-                buyStartDate: addDays(today, -1),
-                buyEndDate: addDays(today, 2),
-                sellTargetDate: addDays(today, 9),
-                sellLimitDate: addDays(today, 13)
-              },
-              userTrade: null,
-              feedback: { status: 'Pendente', actualReturn: null, notes: '' }
-            }
-          ]
-        },
-        {
-          id: 'anl-init-4',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 120).toISOString(),
-          source: 'Bloomberg',
-          credibilityKey: 'tier1',
-          url: 'https://www.bloomberg.com',
-          title: 'Fluxo institucional para ETFs de Bitcoin atinge máxima mensal com entrada de fundos de pensão',
-          content: 'Entradas líquidas acima de US$ 1,2 bilhão elevam volatilidade implícita e atraem fluxo especulativo.',
-          engine: 'IA Probabilística',
-          influenceScore: 79,
-          sentimentScore: 72,
-          macroImpactScore: 74,
-          impactDurationLabel: '24h a 72h (Alta Volatilidade)',
-          impactDecayCurve: [90, 74, 55, 42, 33, 25, 20],
-          summary: 'Forte fluxo institucional cria momentum de alta, porém exige realização rápida na janela de saída.',
-          recommendations: [
-            {
-              asset: 'BTC / HASH11',
-              sector: 'Criptoativos',
-              horizon: 'Diário',
-              action: 'REALIZAR LUCRO / SACAR',
-              entryWindow: 'Janela de venda ativa hoje (risco alto para compra)',
-              liquidationTerm: 'Hoje até +2 dias',
-              riskLevel: 'Especulativo',
-              baseLossProbability: 54,
-              lossProbability: 50,
-              gainProbability: 50,
-              scenarios: { optimistic: 35, base: 15, pessimistic: 50 },
-              rationale: 'Ciclo de entrada já se encerrou; o ativo entrou na zona vermelha de realização/saque.',
-              schedule: {
-                buyStartDate: addDays(today, -6),
-                buyEndDate: addDays(today, -4),
-                sellTargetDate: today,
-                sellLimitDate: addDays(today, 2)
-              },
-              userTrade: {
-                buyDate: addDays(today, -2),
-                buyPrice: 48.90,
-                investedAmount: 800,
-                sellDate: '',
-                sellPrice: null,
-                notes: 'Entrei 2 dias depois do fim da janela verde (teste de entrada tardia).'
-              },
-              feedback: { status: 'Parcial', actualReturn: -1.4, notes: 'Entrada tardia reduziu margem de segurança.' }
-            }
-          ]
-        }
-      ];
+    function formatDateShort(dateStr) {
+      if (!dateStr) return '--/--';
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      return `${parts[2]}/${parts[1]}`;
     }
 
-    // Feed inicial de canais oficiais e fontes financeiras Tier-1
-    function createInitialFeed() {
-      const nowLabel = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      return [
-        {
-          id: 'feed-init-1',
-          source: 'Banco Central (Copom)',
-          credibilityKey: 'official',
-          url: 'https://www.bcb.gov.br/controleinflacao/historicotaxasjuros',
-          date: nowLabel,
-          title: 'Copom reforça vigilância com inflação de serviços e sinaliza Selic restritiva',
-          content: 'Comunicado oficial destaca necessidade de manter política monetária contracionista para reancorar expectativas do IPCA, beneficiando renda fixa pós-fixada e FIIs de papel indexados ao CDI.'
-        },
-        {
-          id: 'feed-init-2',
-          source: 'CVM — Fato Relevante',
-          credibilityKey: 'official',
-          url: 'https://www.gov.br/cvm',
-          date: nowLabel,
-          title: 'Itaú Unibanco reporta expansão de ROE acima de 21% e anuncia proventos adicionais',
-          content: 'Balanço trimestral superou consenso de mercado com inadimplência sob controle e forte margem financeira, reforçando atratividade defensiva no setor bancário da B3.'
-        },
-        {
-          id: 'feed-init-3',
-          source: 'Reuters / Google Finanças',
-          credibilityKey: 'tier1',
-          url: 'https://www.google.com/finance',
-          date: nowLabel,
-          title: 'Demanda global por infraestrutura de IA impulsiona semicondutores e Nasdaq',
-          content: 'Pedidos recordes de data centers sustentam revisões altistas de receita para líderes de chips e ETFs de tecnologia americana (IVVB11 / NVDC34).'
-        },
-        {
-          id: 'feed-init-4',
-          source: 'Valor Econômico',
-          credibilityKey: 'tier1',
-          url: 'https://valor.globo.com',
-          date: nowLabel,
-          title: 'Minério de ferro avança na Ásia após novos incentivos ao setor imobiliário chinês',
-          content: 'Estímulos de crédito direcionados à infraestrutura elevam preços futuros do minério e melhoram perspectivas de curto prazo para exportadoras brasileiras como VALE3.'
-        },
-        {
-          id: 'feed-init-5',
-          source: 'Mercado / Especulação',
-          credibilityKey: 'rumor',
-          url: 'https://www.infomoney.com.br',
-          date: nowLabel,
-          title: 'Rumores de fusão no varejo doméstico provocam alta volatilidade intradiária',
-          content: 'Agentes de mercado especulam sobre potencial consolidação setorial, mas sem fato relevante confirmado na CVM. Alto risco de reversão caso desmentido.'
-        }
-      ];
+    function formatDateBR(dateStr) {
+      if (!dateStr) return '--/--/----';
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
 
-    // Gera cronograma padrão de datas (Dia 1 -> Fim Verde -> Alvo Venda -> Limite Saída) conforme horizonte
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const styles = {
+        success: 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200',
+        warning: 'bg-amber-950/95 border-amber-500/60 text-amber-200',
+        error:   'bg-rose-950/95 border-rose-500/60 text-rose-200',
+        info:    'bg-slate-900/95 border-sky-500/50 text-sky-200'
+      }[type] || 'bg-slate-900/95 border-slate-700 text-slate-200';
+
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs font-medium leading-snug fade-in ${styles}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3800);
+    }
+
+    // =========================================================================
+    // 3. CALENDÁRIO DINÂMICO DE RISCO & COMPARATIVO DE COMPRA DO USUÁRIO
+    // =========================================================================
     function buildDefaultSchedule(horizon, baseDateStr = null) {
       const start = baseDateStr || getTodayStr();
       if (horizon === 'Diário') {
@@ -1816,220 +1478,176 @@
           sellLimitDate: addDays(start, 7)
         };
       }
-      if (horizon === 'Semanal') {
+      if (horizon === 'Mensal') {
         return {
           buyStartDate: start,
-          buyEndDate: addDays(start, 3),
-          sellTargetDate: addDays(start, 10),
-          sellLimitDate: addDays(start, 14)
+          buyEndDate: addDays(start, 7),
+          sellTargetDate: addDays(start, 22),
+          sellLimitDate: addDays(start, 32)
         };
       }
-      // Mensal
+      // Semanal (padrão)
       return {
         buyStartDate: start,
-        buyEndDate: addDays(start, 5),
-        sellTargetDate: addDays(start, 22),
-        sellLimitDate: addDays(start, 30)
+        buyEndDate: addDays(start, 4),
+        sellTargetDate: addDays(start, 10),
+        sellLimitDate: addDays(start, 14)
       };
     }
 
-    // =========================================================================
-    // 3. MOTOR DE CORES E RISCO DO CALENDÁRIO DINÂMICO
-    // =========================================================================
-    /**
-     * Calcula a zona de risco e a cor exata para qualquer dia no calendário do ativo:
-     * - Dia 1 até Dia Final de Entrada: VERDE (Entrada Ideal)
-     * - Após o Dia Final de Entrada até Alvo de Venda: Gradiente progressivo (Verde-limão -> Amarelo -> Âmbar -> Laranja)
-     * - Do Alvo de Venda até Limite de Saída: VERMELHO/ROSA (Janela de Venda / Saque)
-     * - Após Limite de Saída: VERMELHO ESCURO (Expirado / Crítico)
-     */
     function getDayRiskInfo(dayStr, schedule) {
-      if (!schedule) {
-        return {
-          zone: 'neutral',
-          shortLabel: '',
-          description: 'Fora do ciclo do sinal',
-          cellClass: 'bg-slate-900/50 border-slate-800/80 text-slate-400 hover:border-slate-700',
-          barColor: '#334155',
-          extraRiskPct: 0,
-          isGreenZone: false
-        };
-      }
+      const sched = schedule || buildDefaultSchedule('Semanal');
+      const dFromStart = diffDays(sched.buyStartDate, dayStr);
+      const dFromBuyEnd = diffDays(sched.buyEndDate, dayStr);
+      const dFromSellTarget = diffDays(sched.sellTargetDate, dayStr);
+      const dFromSellLimit = diffDays(sched.sellLimitDate, dayStr);
 
-      const { buyStartDate, buyEndDate, sellTargetDate, sellLimitDate } = schedule;
-      const dFromStart = diffDays(buyStartDate, dayStr);
-      const dFromBuyEnd = diffDays(buyEndDate, dayStr);
-      const dFromSellTarget = diffDays(sellTargetDate, dayStr);
-      const dFromSellLimit = diffDays(sellLimitDate, dayStr);
-
-      // Antes do Dia 1
       if (dFromStart < 0) {
         return {
           zone: 'pre',
-          shortLabel: '',
-          description: `Pré-sinal (${Math.abs(dFromStart)}d antes do início)`,
-          cellClass: 'bg-slate-900/40 border-slate-800/70 text-slate-500 hover:border-slate-700',
-          barColor: '#1e293b',
-          extraRiskPct: 0,
-          isGreenZone: false
+          isGreenZone: false,
+          extraRiskPct: 5,
+          shortLabel: 'Pré',
+          description: 'Antes da abertura da janela recomendada; aguarde confirmação',
+          cellClass: 'bg-slate-900/70 border-slate-800 text-slate-400 hover:border-slate-600',
+          barColor: '#334155'
         };
       }
 
-      // Zona Verde: Dia 1 até Dia Final de Entrada
-      if (dFromStart >= 0 && dFromBuyEnd <= 0) {
+      if (dFromBuyEnd <= 0) {
         const isFirst = dFromStart === 0;
         const isLast = dFromBuyEnd === 0;
-        const tag = isFirst && isLast ? 'D1/FIM' : isFirst ? 'DIA 1' : isLast ? 'FIM ENT' : 'VERDE';
         return {
           zone: 'green',
-          shortLabel: tag,
-          description: isFirst
-            ? 'Dia 1 — Melhor ponto de entrada (Zona Verde)'
-            : isLast
-              ? 'Último dia de entrada ideal (Limite Verde)'
-              : `Dia ${dFromStart + 1} da Janela Verde de entrada`,
-          cellClass: 'bg-emerald-500/25 border-emerald-400/70 text-emerald-100 hover:bg-emerald-500/35',
-          barColor: '#10b981',
+          isGreenZone: true,
           extraRiskPct: 0,
-          isGreenZone: true
+          shortLabel: isFirst ? 'Dia 1' : isLast ? 'Fim Ent.' : 'Verde',
+          description: isFirst
+            ? 'Dia 1 — Melhor ponto de entrada (risco mínimo de timing)'
+            : isLast
+              ? 'Último dia da zona verde de compra ideal'
+              : 'Dentro da janela verde ideal de compra',
+          cellClass: 'bg-emerald-500/25 border-emerald-400/70 text-emerald-200 hover:bg-emerald-500/35',
+          barColor: '#10b981'
         };
       }
 
-      // Zona de Transição: Entre Fim da Entrada e Alvo de Venda (risco sobe progressivamente)
-      if (dFromBuyEnd > 0 && dFromSellTarget < 0) {
-        const totalGap = Math.max(1, diffDays(buyEndDate, sellTargetDate));
-        const progress = dFromBuyEnd / totalGap; // 0..1
-        const extraRiskPct = Math.round(6 + progress * 24); // +6% até +30% de risco adicional de timing
+      if (dFromSellTarget < 0) {
+        const gapSpan = Math.max(1, diffDays(sched.buyEndDate, sched.sellTargetDate));
+        const ratio = Math.min(1, dFromBuyEnd / gapSpan);
+        const extraRiskPct = Math.round(6 + ratio * 18);
 
-        if (progress <= 0.34) {
+        if (ratio <= 0.34) {
           return {
-            zone: 'risk-low',
-            shortLabel: `+${dFromBuyEnd}d`,
-            description: `Risco Leve (+${dFromBuyEnd}d após limite verde • Risco timing +${extraRiskPct}%)`,
-            cellClass: 'bg-lime-400/20 border-lime-400/60 text-lime-100 hover:bg-lime-400/30',
-            barColor: '#a3e635',
+            zone: 'caution_low',
+            isGreenZone: false,
             extraRiskPct,
-            isGreenZone: false
-          };
-        } else if (progress <= 0.67) {
-          return {
-            zone: 'risk-mid',
-            shortLabel: `+${dFromBuyEnd}d`,
-            description: `Risco Moderado/Crescente (+${dFromBuyEnd}d pós-entrada • Risco timing +${extraRiskPct}%)`,
-            cellClass: 'bg-amber-500/25 border-amber-400/70 text-amber-100 hover:bg-amber-500/35',
-            barColor: '#f59e0b',
-            extraRiskPct,
-            isGreenZone: false
-          };
-        } else {
-          return {
-            zone: 'risk-high',
-            shortLabel: 'RISCO+',
-            description: `Risco Elevado para novas compras (+${dFromBuyEnd}d • Risco timing +${extraRiskPct}%)`,
-            cellClass: 'bg-orange-500/30 border-orange-400/75 text-orange-100 hover:bg-orange-500/40',
-            barColor: '#f97316',
-            extraRiskPct,
-            isGreenZone: false
+            shortLabel: `+${extraRiskPct}%`,
+            description: `Entrada tardia leve (+${extraRiskPct}% risco de timing após fim do verde)`,
+            cellClass: 'bg-lime-500/20 border-lime-400/60 text-lime-200 hover:bg-lime-500/30',
+            barColor: '#a3e635'
           };
         }
+        if (ratio <= 0.68) {
+          return {
+            zone: 'caution_mid',
+            isGreenZone: false,
+            extraRiskPct,
+            shortLabel: `+${extraRiskPct}%`,
+            description: `Risco crescente (+${extraRiskPct}%): preço já absorveu parte da notícia`,
+            cellClass: 'bg-amber-500/25 border-amber-400/70 text-amber-200 hover:bg-amber-500/35',
+            barColor: '#f59e0b'
+          };
+        }
+        return {
+          zone: 'caution_high',
+          isGreenZone: false,
+          extraRiskPct,
+          shortLabel: `+${extraRiskPct}%`,
+          description: `Alto risco para novas compras (+${extraRiskPct}%): próximo do alvo de venda`,
+          cellClass: 'bg-orange-500/25 border-orange-400/70 text-orange-200 hover:bg-orange-500/35',
+          barColor: '#f97316'
+        };
       }
 
-      // Zona de Venda / Saque: Entre Alvo de Venda e Limite de Saída
-      if (dFromSellTarget >= 0 && dFromSellLimit <= 0) {
+      if (dFromSellLimit <= 0) {
         const isTarget = dFromSellTarget === 0;
         const isLimit = dFromSellLimit === 0;
         return {
           zone: 'sell',
-          shortLabel: isTarget ? 'VENDA' : isLimit ? 'LIMITE' : 'SACAR',
+          isGreenZone: false,
+          extraRiskPct: 28,
+          shortLabel: isTarget ? 'Alvo Vd' : isLimit ? 'Lim. Vd' : 'Vender',
           description: isTarget
-            ? 'Data Alvo de Venda / Realização de Lucro'
+            ? 'Alvo ideal de realização de lucro / saque'
             : isLimit
-              ? 'Data Limite Máxima para Venda/Saque'
-              : 'Janela de Venda/Saque — Não recomendado comprar aqui',
-          cellClass: 'bg-rose-500/30 border-rose-400/80 text-rose-100 hover:bg-rose-500/40',
-          barColor: '#f43f5e',
-          extraRiskPct: 38,
-          isGreenZone: false
+              ? 'Limite máximo recomendado para encerrar posição'
+              : 'Janela recomendada de venda / liquidação',
+          cellClass: 'bg-rose-500/25 border-rose-400/70 text-rose-200 hover:bg-rose-500/35',
+          barColor: '#f43f5e'
         };
       }
 
-      // Expirado: Após Limite de Saída
       return {
         zone: 'expired',
-        shortLabel: dFromSellLimit <= 3 ? 'EXP' : '',
-        description: `Sinal expirado há ${dFromSellLimit} dia(s) — Risco crítico`,
-        cellClass: dFromSellLimit <= 5
-          ? 'bg-red-950/60 border-red-700/60 text-red-300/80 hover:border-red-500'
-          : 'bg-slate-900/40 border-slate-800/70 text-slate-500 hover:border-slate-700',
-        barColor: '#991b1b',
-        extraRiskPct: 50,
-        isGreenZone: false
+        isGreenZone: false,
+        extraRiskPct: 35,
+        shortLabel: 'Expirado',
+        description: 'Ciclo da notícia encerrado; manter posição eleva exposição não mapeada',
+        cellClass: 'bg-red-950/60 border-red-800/70 text-red-300/80 hover:border-red-600',
+        barColor: '#991b1b'
       };
     }
 
-    /**
-     * Avalia o comparativo entre a compra real do usuário e o calendário do sistema
-     */
     function evaluateUserTradeComparison(rec) {
-      if (!rec || !rec.userTrade || !rec.userTrade.buyDate) return null;
-      const trade = rec.userTrade;
+      const trade = rec?.userTrade;
+      if (!trade || !trade.buyDate) return null;
+
       const sched = rec.schedule || buildDefaultSchedule(rec.horizon);
-      const dayInfo = getDayRiskInfo(trade.buyDate, sched);
-      const dStart = diffDays(sched.buyStartDate, trade.buyDate);
-      const dEnd = diffDays(sched.buyEndDate, trade.buyDate);
-      const today = getTodayStr();
+      const buyInfo = getDayRiskInfo(trade.buyDate, sched);
+      const daysAfterGreen = diffDays(sched.buyEndDate, trade.buyDate);
 
-      let timingCategory = 'late';
-      let timingBadge = 'Entrada Tardia';
-      let timingColor = 'bg-amber-500/15 text-amber-300 border-amber-500/40';
-      let timingText = '';
+      let timingCategory = 'green';
+      let timingBadge = 'Entrada na Zona Verde';
+      let timingColor = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40';
+      let timingText = `Você comprou em ${formatDateBR(trade.buyDate)}, dentro da janela verde planejada (${formatDateShort(sched.buyStartDate)} a ${formatDateShort(sched.buyEndDate)}).`;
 
-      if (dayInfo.isGreenZone) {
-        timingCategory = 'green';
-        timingBadge = 'Compra na Zona Verde (Ideal)';
-        timingColor = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40';
-        timingText = `Você comprou no Dia ${dStart + 1} da janela verde (${formatDateBR(trade.buyDate)}), dentro do limite ideal de baixo risco.`;
-      } else if (dStart < 0) {
+      if (buyInfo.zone === 'pre') {
         timingCategory = 'early';
-        timingBadge = `Antecipada (${Math.abs(dStart)}d antes)`;
+        timingBadge = 'Entrada Antecipada';
         timingColor = 'bg-sky-500/15 text-sky-300 border-sky-500/40';
-        timingText = `Compra realizada ${Math.abs(dStart)} dia(s) antes do Dia 1 do sinal.`;
-      } else if (dayInfo.zone === 'sell' || dayInfo.zone === 'expired') {
-        timingCategory = 'critical';
-        timingBadge = `Risco Crítico (+${dEnd}d após verde)`;
-        timingColor = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
-        timingText = `Compra feita na janela de saída/expiração (+${dEnd}d após o limite verde, risco adicional ~+${dayInfo.extraRiskPct}%).`;
-      } else {
+        timingText = `Você comprou ${Math.abs(diffDays(trade.buyDate, sched.buyStartDate))} dia(s) antes do Dia 1 sugerido pelo modelo.`;
+      } else if (!buyInfo.isGreenZone && daysAfterGreen > 0 && daysAfterGreen <= 3) {
         timingCategory = 'late';
-        timingBadge = `Entrada Tardia (+${dEnd}d pós-verde)`;
-        timingColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-        timingText = `Compra feita ${dEnd} dia(s) após o fim da janela verde (risco adicional estimado de +${dayInfo.extraRiskPct}%).`;
+        timingBadge = `Atraso Leve (+${daysAfterGreen}d)`;
+        timingColor = 'bg-amber-500/15 text-amber-300 border-amber-500/40';
+        timingText = `Compra realizada ${daysAfterGreen} dia(s) após o fim da zona verde (+${buyInfo.extraRiskPct}% de risco adicional de timing).`;
+      } else if (!buyInfo.isGreenZone) {
+        timingCategory = 'critical';
+        timingBadge = 'Fora da Janela Verde';
+        timingColor = 'bg-rose-500/15 text-rose-300 border-rose-500/40';
+        timingText = `Compra realizada fora da janela verde (${buyInfo.description}).`;
       }
 
-      // Cálculo de retorno se houver preço de compra e venda
-      let returnPct = null;
-      let profitMoney = null;
-      if (trade.buyPrice && trade.sellPrice && trade.buyPrice > 0) {
-        returnPct = ((trade.sellPrice - trade.buyPrice) / trade.buyPrice) * 100;
-        if (trade.investedAmount && trade.investedAmount > 0) {
-          profitMoney = trade.investedAmount * (returnPct / 100);
+      let exitText = `Alvo de saída sugerido entre ${formatDateShort(sched.sellTargetDate)} e ${formatDateShort(sched.sellLimitDate)}.`;
+      if (trade.sellDate) {
+        const diffExit = diffDays(sched.sellLimitDate, trade.sellDate);
+        if (diffExit <= 0 && diffDays(sched.sellTargetDate, trade.sellDate) >= 0) {
+          exitText = `Venda executada em ${formatDateBR(trade.sellDate)}, exatamente dentro da janela ideal de liquidação.`;
+        } else if (diffExit > 0) {
+          exitText = `Venda executada ${diffExit} dia(s) após o prazo limite de saída (${formatDateBR(sched.sellLimitDate)}).`;
+        } else {
+          exitText = `Venda antecipada realizada em ${formatDateBR(trade.sellDate)} (antes do alvo ${formatDateShort(sched.sellTargetDate)}).`;
         }
       }
 
-      // Status de venda/holding
-      const daysToSellTarget = diffDays(today, sched.sellTargetDate);
-      const daysToSellLimit = diffDays(today, sched.sellLimitDate);
-      let exitText = '';
-      if (trade.sellDate) {
-        const holdDays = Math.max(0, diffDays(trade.buyDate, trade.sellDate));
-        const dVsTarget = diffDays(sched.sellTargetDate, trade.sellDate);
-        exitText = `Vendido em ${formatDateBR(trade.sellDate)} (${holdDays}d posicionado — ${dVsTarget === 0 ? 'exatamente no alvo' : dVsTarget < 0 ? `${Math.abs(dVsTarget)}d antes do alvo` : `${dVsTarget}d após o alvo`}).`;
-      } else if (daysToSellTarget > 0) {
-        exitText = `Em aberto • Faltam ${daysToSellTarget}d para o alvo de venda (${formatDateShort(sched.sellTargetDate)}) e ${Math.max(0, daysToSellLimit)}d para o limite.`;
-      } else if (daysToSellLimit >= 0) {
-        exitText = `Em aberto • ATENÇÃO: Janela de venda ativa agora! Prazo limite termina em ${daysToSellLimit === 0 ? 'HOJE' : `${daysToSellLimit}d`}.`;
-      } else {
-        exitText = `Em aberto • Prazo limite de saída expirou há ${Math.abs(daysToSellLimit)} dia(s). Avalie liquidar.`;
+      let returnPct = null;
+      let profitMoney = null;
+      if (trade.buyPrice && trade.sellPrice && Number(trade.buyPrice) > 0) {
+        returnPct = ((Number(trade.sellPrice) - Number(trade.buyPrice)) / Number(trade.buyPrice)) * 100;
+        if (trade.investedAmount && Number(trade.investedAmount) > 0) {
+          profitMoney = Number(trade.investedAmount) * (returnPct / 100);
+        }
       }
 
       return {
@@ -2039,32 +1657,422 @@
         timingText,
         exitText,
         returnPct,
-        profitMoney,
-        extraRiskPct: dayInfo.extraRiskPct
+        profitMoney
       };
     }
 
     // =========================================================================
-    // 4. PERSISTÊNCIA LOCAL NO NAVEGADOR (LOCALSTORAGE)
+    // 4. CÁLCULO CALIBRADO DE INFLUÊNCIA E PROBABILIDADE DE PERDA
     // =========================================================================
+    function computeCalibratedMetrics(credScore, sentimentScore, macroScore, baseLossProb) {
+      const { wCred, wSent, wMacro, riskProfile } = state.calibration;
+      const sum = Math.max(1, Number(wCred) + Number(wSent) + Number(wMacro));
+      const iin = ((wCred * credScore) + (wSent * Math.abs(sentimentScore)) + (wMacro * macroScore)) / sum;
+      const factor = RISK_PROFILE_FACTORS[riskProfile] || 1.0;
+      const rawLoss = Number(baseLossProb) * factor * (1.35 - iin / 200);
+      const lossProb = Math.max(5, Math.min(92, Math.round(rawLoss)));
+      const gainProb = 100 - lossProb;
+      return { iin, lossProb, gainProb };
+    }
+
+    function applyCalibrationToAllAnalyses() {
+      (state.analyses || []).forEach((anl) => {
+        const credInfo = CREDIBILITY_MAP[anl.credibilityKey] || CREDIBILITY_MAP.tier1;
+        const baseCalc = computeCalibratedMetrics(credInfo.score, anl.sentimentScore || 0, anl.macroImpactScore || 70, 30);
+        anl.influenceScore = Math.round(baseCalc.iin);
+
+        (anl.recommendations || []).forEach((rec) => {
+          const baseLoss = rec.baseLossProbability || rec.lossProbability || 32;
+          const calc = computeCalibratedMetrics(credInfo.score, anl.sentimentScore || 0, anl.macroImpactScore || 70, baseLoss);
+          rec.lossProbability = calc.lossProb;
+          rec.gainProbability = calc.gainProb;
+          const rem = 100 - calc.lossProb;
+          const opt = Math.round(rem * 0.55);
+          rec.scenarios = {
+            optimistic: opt,
+            base: Math.max(0, rem - opt),
+            pessimistic: calc.lossProb
+          };
+        });
+      });
+    }
+
+    function ensureAllSchedulesExist() {
+      (state.analyses || []).forEach((anl) => {
+        (anl.recommendations || []).forEach((rec) => {
+          if (!rec.schedule || !rec.schedule.buyStartDate) {
+            rec.schedule = buildDefaultSchedule(rec.horizon || 'Semanal');
+          }
+        });
+      });
+    }
+
+    // =========================================================================
+    // 5. DADOS INICIAIS (NOTÍCIAS, ATIVOS GOOGLE FINANÇAS & MACRO)
+    // =========================================================================
+    function generateHistoricalSeries(currentPrice, change30dPct, volAnnualPct, pointsCount = 252, seedStr = 'ASSET') {
+      const pEnd = Number(currentPrice) || 50;
+      const ch30 = (Number(change30dPct) || 0) / 100;
+      const dailyVol = ((Number(volAnnualPct) || 24) / 100) / Math.sqrt(252);
+
+      let seed = 0;
+      for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) % 100000;
+      const nextRand = () => {
+        seed = (seed * 1664525 + 1013904223) % 4294967296;
+        return seed / 4294967296;
+      };
+
+      const series = new Array(pointsCount);
+      series[pointsCount - 1] = Number(pEnd.toFixed(2));
+      const dailyDrift = ch30 / 21;
+
+      for (let i = pointsCount - 2; i >= 0; i--) {
+        const shock = (nextRand() - 0.5) * 2.1 * dailyVol;
+        const prev = series[i + 1] / (1 + dailyDrift + shock);
+        series[i] = Number(Math.max(0.5, prev).toFixed(2));
+      }
+      return series;
+    }
+
+    function createInitialMacroIndicators() {
+      return [
+        { symbol: 'IBOV', label: 'IBOVESPA', value: '129.850', changePct: 0.64, source: 'Google Finanças' },
+        { symbol: 'IFIX', label: 'IFIX (FIIs)', value: '3.385', changePct: 0.22, source: 'Google Finanças' },
+        { symbol: 'USDBRL', label: 'Dólar (USD/BRL)', value: 'R$ 5,74', changePct: -0.35, source: 'Google Finanças' },
+        { symbol: 'SELIC', label: 'Selic Meta', value: '14,25% a.a.', changePct: 0, source: 'BCB Oficial' },
+        { symbol: 'SPX', label: 'S&P 500', value: '5.980', changePct: 0.48, source: 'Google Finanças' },
+        { symbol: 'BTC', label: 'Bitcoin (BTC)', value: 'US$ 94.200', changePct: 1.85, source: 'Google Finanças' }
+      ];
+    }
+
+    function createEconomicEvents() {
+      const today = getTodayStr();
+      return [
+        {
+          date: addDays(today, 2),
+          impact: 'Alto',
+          title: 'Divulgação IPCA-15 / Prévia da Inflação (IBGE)',
+          assets: 'Tesouro IPCA+, IFIX, Varejo & Bancos',
+          note: 'Leitura acima do consenso pressiona curva de juros futuros e beneficia títulos indexados à inflação.'
+        },
+        {
+          date: addDays(today, 5),
+          impact: 'Crítico',
+          title: 'Payroll & Taxa de Desemprego EUA (BLS)',
+          assets: 'IVVB11, USD/BRL, BDRs Tech & Ouro',
+          note: 'Principal gatilho de volatilidade intradiária para o dólar e expectativas de corte de juros do Fed.'
+        },
+        {
+          date: addDays(today, 9),
+          impact: 'Crítico',
+          title: 'Decisão de Taxa Selic — Reunião do Copom (BCB)',
+          assets: 'IBOV, FIIs (MXRF11/HGLG11), Renda Fixa',
+          note: 'Comunicado define o ritmo monetário para os próximos 45 dias e altera janelas mensais.'
+        },
+        {
+          date: addDays(today, 12),
+          impact: 'Moderado',
+          title: 'Data-Com Mensal de Dividendos dos FIIs B3',
+          assets: 'MXRF11, HGLG11, XPML11, KNCR11',
+          note: 'Último pregão para garantir direito aos rendimentos isentos do mês corrente.'
+        }
+      ];
+    }
+
+    function createInitialMarketAssets() {
+      const raw = [
+        {
+          ticker: 'PETR4', gfSymbol: 'PETR4:BVMF', name: 'Petrobras PN', assetClass: 'Ação B3',
+          sector: 'Petróleo & Energia', currency: 'R$', price: 37.90, changeDay: 1.15, change30d: 4.8, change12m: 16.4,
+          dy: 14.2, plOrPvpLabel: 'P/L', plOrPvp: 5.4, min52w: 32.10, max52w: 42.80,
+          volatility: 29, rsi: 54, beta: 1.18, liquidity: 'R$ 1,4B/dia',
+          riskLevel: 'Moderado', bias: 'Compra', score: 84,
+          summary: 'Forte geração de caixa livre, disciplina de capex e fluxo consistente de dividendos extraordinários e ordinários.',
+          recentNews: ['Brent sustenta patamar acima de US$ 74 com cortes da OPEP+.', 'Produção no pré-sal atinge novo recorde operacional trimestral.']
+        },
+        {
+          ticker: 'VALE3', gfSymbol: 'VALE3:BVMF', name: 'Vale ON', assetClass: 'Ação B3',
+          sector: 'Mineração & Indústria', currency: 'R$', price: 58.40, changeDay: -0.65, change30d: -2.4, change12m: -8.1,
+          dy: 9.6, plOrPvpLabel: 'P/L', plOrPvp: 6.8, min52w: 53.90, max52w: 69.50,
+          volatility: 32, rsi: 41, beta: 1.12, liquidity: 'R$ 1,2B/dia',
+          riskLevel: 'Alto', bias: 'Compra', score: 77,
+          summary: 'Múltiplos descontados frente aos pares globais com assimetria favorável caso estímulos industriais na Ásia ganhem tração.',
+          recentNews: ['Estoques de minério em portos chineses recuam pela 2ª semana.', 'Acordo definitivo de Mariana reduz incerteza jurídica de longo prazo.']
+        },
+        {
+          ticker: 'ITUB4', gfSymbol: 'ITUB4:BVMF', name: 'Itaú Unibanco PN', assetClass: 'Ação B3',
+          sector: 'Bancos & Financeiro', currency: 'R$', price: 34.60, changeDay: 0.72, change30d: 5.3, change12m: 19.2,
+          dy: 7.4, plOrPvpLabel: 'P/L', plOrPvp: 8.6, min52w: 28.90, max52w: 36.80,
+          volatility: 20, rsi: 59, beta: 0.88, liquidity: 'R$ 950M/dia',
+          riskLevel: 'Baixo', bias: 'Compra', score: 87,
+          summary: 'ROE recorrente acima de 22%, inadimplência controlada e margem financeira beneficiada pelo juro elevado.',
+          recentNews: ['Bancos brasileiros lideram projeções de lucro na América Latina.', 'Eficiência digital reduz índice de despesas operacionais.']
+        },
+        {
+          ticker: 'MXRF11', gfSymbol: 'MXRF11:BVMF', name: 'Maxi Renda FII (Papel)', assetClass: 'FII',
+          sector: 'Imobiliário', currency: 'R$', price: 9.68, changeDay: 0.31, change30d: 2.1, change12m: 4.5,
+          dy: 12.1, plOrPvpLabel: 'P/VP', plOrPvp: 0.99, min52w: 9.12, max52w: 10.65,
+          volatility: 11, rsi: 48, beta: 0.42, liquidity: 'R$ 14M/dia',
+          riskLevel: 'Baixo', bias: 'Compra', score: 86,
+          summary: 'Carteira pulverizada de CRIs indexados ao CDI e IPCA com excelente liquidez e rendimentos mensais isentos.',
+          recentNews: ['Selic elevada mantém carrego atrativo nos CRIs indexados ao CDI.', 'Base de cotistas ultrapassa 1,2 milhão na B3.']
+        },
+        {
+          ticker: 'HGLG11', gfSymbol: 'HGLG11:BVMF', name: 'Pátria Logística FII (Tijolo)', assetClass: 'FII',
+          sector: 'Imobiliário', currency: 'R$', price: 156.20, changeDay: 0.45, change30d: 3.4, change12m: 6.2,
+          dy: 8.9, plOrPvpLabel: 'P/VP', plOrPvp: 0.96, min52w: 145.00, max52w: 168.50,
+          volatility: 13, rsi: 51, beta: 0.48, liquidity: 'R$ 9M/dia',
+          riskLevel: 'Baixo', bias: 'Compra', score: 82,
+          summary: 'Galpões logísticos triple-A próximos a São Paulo com baixa vacância e contratos atípicos de longo prazo.',
+          recentNews: ['E-commerce impulsiona absorção líquida de galpões no eixo SP-MG.', 'Desconto patrimonial oferece margem de segurança para longo prazo.']
+        },
+        {
+          ticker: 'IVVB11', gfSymbol: 'IVVB11:BVMF', name: 'iShares S&P 500 FIC FI IE', assetClass: 'ETF',
+          sector: 'Índices & Macro', currency: 'R$', price: 382.50, changeDay: 0.55, change30d: 6.2, change12m: 31.4,
+          dy: 0, plOrPvpLabel: 'P/L', plOrPvp: 24.5, min52w: 285.00, max52w: 396.00,
+          volatility: 19, rsi: 61, beta: 1.00, liquidity: 'R$ 110M/dia',
+          riskLevel: 'Moderado', bias: 'Compra', score: 85,
+          summary: 'Exposição direta às 500 maiores empresas dos EUA com proteção cambial natural em dólar.',
+          recentNews: ['Lucros corporativos do S&P 500 superam estimativas em tecnologia e saúde.', 'ETF segue como principal veículo de diversificação internacional na B3.']
+        },
+        {
+          ticker: 'NVDA', gfSymbol: 'NVDA:NASDAQ', name: 'NVIDIA Corporation', assetClass: 'BDR / Global',
+          sector: 'Tecnologia & IA', currency: 'US$', price: 141.80, changeDay: 1.90, change30d: 9.4, change12m: 118.0,
+          dy: 0.03, plOrPvpLabel: 'P/L', plOrPvp: 46.2, min52w: 75.60, max52w: 152.80,
+          volatility: 44, rsi: 64, beta: 1.65, liquidity: 'US$ 32B/dia',
+          riskLevel: 'Alto', bias: 'Compra', score: 81,
+          summary: 'Liderança dominante em infraestrutura de IA e data centers com demanda bilionária pela arquitetura Blackwell.',
+          recentNews: ['Big Techs ampliam orçamento de capex em IA para o próximo ano.', 'Margem bruta acima de 73% sustenta expansão acelerada de receita.']
+        },
+        {
+          ticker: 'TESOURO-IPCA', gfSymbol: 'BOVA11:BVMF', name: 'Tesouro IPCA+ 2029 (Juro Real)', assetClass: 'Fundo / RF',
+          sector: 'Soberano & Crédito', currency: 'R$', price: 3240.00, changeDay: 0.18, change30d: 1.6, change12m: 11.8,
+          dy: 7.35, plOrPvpLabel: 'Taxa Real', plOrPvp: 7.35, min52w: 2980.00, max52w: 3290.00,
+          volatility: 7, rsi: 46, beta: 0.15, liquidity: 'D+0 Tesouro',
+          riskLevel: 'Baixo', bias: 'Compra', score: 91,
+          summary: 'Taxa real acima de IPCA + 7,3% a.a. oferece proteção inflacionária soberana e potencial de marcação a mercado.',
+          recentNews: ['Juros reais atingem patamar historicamente atrativo para travar rentabilidade.', 'Baixíssimo risco de crédito com liquidez diária garantida pelo Tesouro.']
+        },
+        {
+          ticker: 'HASH11', gfSymbol: 'HASH11:BVMF', name: 'Hashdex Nasdaq Crypto Index ETF', assetClass: 'Cripto',
+          sector: 'Criptoativos', currency: 'R$', price: 68.40, changeDay: 2.35, change30d: 14.2, change12m: 88.5,
+          dy: 0, plOrPvpLabel: 'Beta BTC', plOrPvp: 1.05, min52w: 36.10, max52w: 74.90,
+          volatility: 56, rsi: 66, beta: 1.85, liquidity: 'R$ 45M/dia',
+          riskLevel: 'Especulativo', bias: 'Neutro', score: 74,
+          summary: 'Cesta regulada de criptoativos na B3 impulsionada por fluxo institucional em ETFs à vista nos EUA.',
+          recentNews: ['ETFs spot de Bitcoin registram entradas líquidas semanais recordes.', 'Alta volatilidade exige gestão estrita de janela de entrada e saída.']
+        }
+      ];
+
+      return raw.map((item) => ({
+        ...item,
+        support: Number((item.price * 0.945).toFixed(2)),
+        resistance: Number((item.price * 1.075).toFixed(2)),
+        dataSource: 'Google Finanças + Quant',
+        updatedAt: new Date().toISOString(),
+        citations: [],
+        history252: generateHistoricalSeries(item.price, item.change30d, item.volatility, 252, item.ticker)
+      }));
+    }
+
+    function createInitialFeed() {
+      const todayLabel = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      return [
+        {
+          id: 'feed-seed-1',
+          source: 'Banco Central do Brasil (Copom)',
+          credibilityKey: 'official',
+          url: 'https://www.bcb.gov.br',
+          date: `HOJE • 08:30 (${todayLabel})`,
+          title: 'Ata do Copom reforça compromisso com meta de inflação e sinaliza juros restritivos no curto prazo',
+          content: 'O Comitê de Política Monetária destacou que a ancoragem das expectativas exige serenidade e manutenção da taxa Selic em patamar contracionista, favorecendo ativos indexados ao CDI e títulos públicos IPCA+ de médio prazo.'
+        },
+        {
+          id: 'feed-seed-2',
+          source: 'Valor Econômico / B3',
+          credibilityKey: 'tier1',
+          url: 'https://valor.globo.com',
+          date: `HOJE • 09:45 (${todayLabel})`,
+          title: 'Fluxo estrangeiro na B3 volta ao campo positivo liderado por bancos e petroleiras com dividendos elevados',
+          content: 'Investidores institucionais globais elevaram alocação em blue chips brasileiras descontadas, com destaque para Itaú (ITUB4) e Petrobras (PETR4) diante da geração de caixa resiliente.'
+        },
+        {
+          id: 'feed-seed-3',
+          source: 'Reuters / Google Finanças',
+          credibilityKey: 'tier1',
+          url: 'https://www.google.com/finance',
+          date: `HOJE • 10:15 (${todayLabel})`,
+          title: 'Gigantes de tecnologia dos EUA ampliam investimentos em data centers de IA e sustentam S&P 500',
+          content: 'Relatórios trimestrais confirmam aceleração nos gastos com infraestrutura de inteligência artificial, impulsionando semicondutores e ETFs atrelados ao índice americano como o IVVB11.'
+        },
+        {
+          id: 'feed-seed-4',
+          source: 'InfoMoney / IFIX',
+          credibilityKey: 'tier1',
+          url: 'https://www.infomoney.com.br',
+          date: `ONTEM • 17:20`,
+          title: 'FIIs de papel e logística negociam abaixo do valor patrimonial com Dividend Yield médio acima de 10% a.a.',
+          content: 'Com o desconto no P/VP em fundos imobiliários de alta liquidez como MXRF11 e HGLG11, gestores apontam janela atrativa de acumulação para renda mensal isenta.'
+        }
+      ];
+    }
+
+    function createInitialAnalyses() {
+      const today = getTodayStr();
+      const sDaily = buildDefaultSchedule('Diário', today);
+      const sWeekly = buildDefaultSchedule('Semanal', addDays(today, -1));
+      const sMonthly = buildDefaultSchedule('Mensal', addDays(today, -2));
+
+      return [
+        {
+          id: 'anl-seed-1',
+          createdAt: new Date(Date.now() - 3600 * 1000 * 3).toISOString(),
+          source: 'Valor Econômico / B3',
+          credibilityKey: 'tier1',
+          url: 'https://www.google.com/finance/quote/PETR4:BVMF',
+          title: 'Fluxo estrangeiro na B3 retorna para petroleiras e bancos com forte geração de dividendos',
+          content: 'Entrada de capital institucional externo e estabilidade do petróleo Brent sustentam assimetria positiva no curto prazo para PETR4.',
+          engine: 'Gemini IA + Quant',
+          influenceScore: 84,
+          sentimentScore: 68,
+          macroImpactScore: 80,
+          impactDurationLabel: '5 a 7 dias úteis',
+          impactDecayCurve: [94, 86, 74, 60, 46, 32, 18],
+          summary: 'Fluxo institucional positivo e carrego de dividendos favorecem entrada tática nos primeiros dias da janela verde.',
+          recommendations: [
+            {
+              asset: 'PETR4',
+              sector: 'Petróleo & Energia',
+              horizon: 'Diário',
+              action: 'COMPRAR / ENTRAR',
+              entryWindow: `Verde: ${formatDateShort(sDaily.buyStartDate)} até ${formatDateShort(sDaily.buyEndDate)}`,
+              liquidationTerm: `Alvo ${formatDateShort(sDaily.sellTargetDate)} (Lim. ${formatDateShort(sDaily.sellLimitDate)})`,
+              riskLevel: 'Moderado',
+              baseLossProbability: 28,
+              lossProbability: 26,
+              gainProbability: 74,
+              scenarios: { optimistic: 41, base: 33, pessimistic: 26 },
+              rationale: 'Forte fluxo comprador estrangeiro na abertura da semana com suporte técnico bem definido.',
+              schedule: sDaily,
+              userTrade: null,
+              feedback: { status: 'Pendente', actualReturn: null, notes: '' }
+            }
+          ]
+        },
+        {
+          id: 'anl-seed-2',
+          createdAt: new Date(Date.now() - 3600 * 1000 * 18).toISOString(),
+          source: 'Reuters / Google Finanças',
+          credibilityKey: 'tier1',
+          url: 'https://www.google.com/finance/quote/IVVB11:BVMF',
+          title: 'Expansão de capex em IA nos EUA impulsiona S&P 500 e ETFs internacionais',
+          content: 'Resultados corporativos acima do esperado nas empresas de tecnologia americanas reforçam tendência semanal positiva para IVVB11.',
+          engine: 'Gemini IA + Quant',
+          influenceScore: 82,
+          sentimentScore: 62,
+          macroImpactScore: 78,
+          impactDurationLabel: '1 a 2 semanas',
+          impactDecayCurve: [90, 82, 72, 60, 48, 36, 24],
+          summary: 'Momentum positivo nos índices dos EUA favorece alocação semanal diversificada em moeda forte.',
+          recommendations: [
+            {
+              asset: 'IVVB11',
+              sector: 'ETF • Internacional',
+              horizon: 'Semanal',
+              action: 'COMPRAR / ENTRAR',
+              entryWindow: `Verde: ${formatDateShort(sWeekly.buyStartDate)} até ${formatDateShort(sWeekly.buyEndDate)}`,
+              liquidationTerm: `Alvo ${formatDateShort(sWeekly.sellTargetDate)} (Lim. ${formatDateShort(sWeekly.sellLimitDate)})`,
+              riskLevel: 'Moderado',
+              baseLossProbability: 30,
+              lossProbability: 28,
+              gainProbability: 72,
+              scenarios: { optimistic: 40, base: 32, pessimistic: 28 },
+              rationale: 'Tendência primária de alta no S&P 500 combinada com proteção cambial em dólar.',
+              schedule: sWeekly,
+              userTrade: {
+                buyDate: addDays(today, -1),
+                buyPrice: 380.20,
+                investedAmount: 2000,
+                sellDate: '',
+                sellPrice: null,
+                notes: 'Entrada realizada dentro da janela verde semanal.'
+              },
+              feedback: { status: 'Pendente', actualReturn: null, notes: '' }
+            }
+          ]
+        },
+        {
+          id: 'anl-seed-3',
+          createdAt: new Date(Date.now() - 3600 * 1000 * 36).toISOString(),
+          source: 'Banco Central do Brasil (Copom)',
+          credibilityKey: 'official',
+          url: 'https://www.bcb.gov.br',
+          title: 'Copom mantém postura firme no combate à inflação e sustains juros reais elevados',
+          content: 'Comunicação oficial do Banco Central reforça atratividade de títulos indexados à inflação e FIIs de papel de alta liquidez.',
+          engine: 'Gemini IA + Quant',
+          influenceScore: 89,
+          sentimentScore: 54,
+          macroImpactScore: 92,
+          impactDurationLabel: '3 a 5 semanas',
+          impactDecayCurve: [96, 90, 82, 72, 62, 50, 38],
+          summary: 'Política monetária contracionista favorece posições mensais defensivas com alto carrego.',
+          recommendations: [
+            {
+              asset: 'MXRF11',
+              sector: 'Fundos Imobiliários',
+              horizon: 'Mensal',
+              action: 'COMPRAR / ENTRAR',
+              entryWindow: `Verde: ${formatDateShort(sMonthly.buyStartDate)} até ${formatDateShort(sMonthly.buyEndDate)}`,
+              liquidationTerm: `Alvo ${formatDateShort(sMonthly.sellTargetDate)} (Lim. ${formatDateShort(sMonthly.sellLimitDate)})`,
+              riskLevel: 'Baixo',
+              baseLossProbability: 21,
+              lossProbability: 19,
+              gainProbability: 81,
+              scenarios: { optimistic: 45, base: 36, pessimistic: 19 },
+              rationale: 'P/VP próximo de 0,99 e carteira indexada ao CDI/IPCA garantem rendimentos mensais resilientes.',
+              schedule: sMonthly,
+              userTrade: null,
+              feedback: { status: 'Acertou', actualReturn: 2.45, notes: 'Valorização da cota + dividendo mensal dentro do previsto.' }
+            }
+          ]
+        }
+      ];
+    }
+
+    // =========================================================================
+    // 6. PERSISTÊNCIA LOCAL NO NAVEGADOR (localStorage)
+    // =========================================================================
+    function updateSyncBadge(statusText = 'Salvo no Navegador') {
+      const textEl = document.getElementById('sync-text');
+      const dotEl = document.getElementById('sync-dot');
+      const footerEl = document.getElementById('footer-storage-info');
+      const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      if (textEl) textEl.textContent = `${statusText} (${timeStr})`;
+      if (dotEl) dotEl.className = 'w-2 h-2 rounded-full bg-emerald-400';
+      if (footerEl) {
+        footerEl.textContent = `Armazenamento Local: ${state.analyses.length} análises • ${state.marketAssets.length} ativos monitorados`;
+      }
+    }
+
     function saveToBrowserStorage() {
       try {
-        state.lastSavedAt = new Date().toISOString();
         const payload = {
-          version: 3,
-          lastSavedAt: state.lastSavedAt,
+          version: 2,
+          savedAt: new Date().toISOString(),
           calibration: state.calibration,
-          analyses: state.analyses,
-          feedItems: state.feedItems,
+          autoCollect: state.autoCollect,
           macroIndicators: state.macroIndicators,
           marketAssets: state.marketAssets,
-          autoCollect: state.autoCollect
+          analyses: state.analyses,
+          feedItems: state.feedItems,
+          selectedSignalKey: state.selectedSignalKey,
+          selectedMarketTicker: state.selectedMarketTicker
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        updateStorageBadge();
+        updateSyncBadge('Salvo no Navegador');
       } catch (err) {
-        console.warn('Erro ao salvar no localStorage:', err);
-        showToast('Aviso: não foi possível gravar no armazenamento local do navegador.', 'warning');
+        console.warn('Falha ao salvar no localStorage:', err);
       }
     }
 
@@ -2073,154 +2081,102 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.analyses) && parsed.analyses.length > 0) {
-            state.analyses = parsed.analyses;
-            state.feedItems = Array.isArray(parsed.feedItems) && parsed.feedItems.length > 0
-              ? parsed.feedItems
-              : createInitialFeed();
+          if (parsed && typeof parsed === 'object') {
+            if (parsed.calibration) state.calibration = { ...state.calibration, ...parsed.calibration };
+            if (parsed.autoCollect) state.autoCollect = { ...state.autoCollect, ...parsed.autoCollect };
             state.macroIndicators = Array.isArray(parsed.macroIndicators) && parsed.macroIndicators.length > 0
               ? parsed.macroIndicators
               : createInitialMacroIndicators();
             state.marketAssets = Array.isArray(parsed.marketAssets) && parsed.marketAssets.length > 0
               ? parsed.marketAssets
               : createInitialMarketAssets();
-            if (parsed.autoCollect) {
-              state.autoCollect = { ...state.autoCollect, ...parsed.autoCollect };
-            }
-            if (parsed.calibration) {
-              state.calibration = { ...state.calibration, ...parsed.calibration };
-            }
-            state.lastSavedAt = parsed.lastSavedAt || new Date().toISOString();
+            state.analyses = Array.isArray(parsed.analyses) && parsed.analyses.length > 0
+              ? parsed.analyses
+              : createInitialAnalyses();
+            state.feedItems = Array.isArray(parsed.feedItems) && parsed.feedItems.length > 0
+              ? parsed.feedItems
+              : createInitialFeed();
+            if (parsed.selectedSignalKey) state.selectedSignalKey = parsed.selectedSignalKey;
+            if (parsed.selectedMarketTicker) state.selectedMarketTicker = parsed.selectedMarketTicker;
+
             ensureAllSchedulesExist();
             applyCalibrationToAllAnalyses();
-            updateStorageBadge();
+            updateSyncBadge('Carregado do Navegador');
             return;
           }
         }
       } catch (err) {
-        console.warn('Erro ao ler localStorage, restaurando padrão:', err);
+        console.warn('Erro ao ler localStorage, iniciando dados padrão:', err);
       }
 
-      // Primeira execução: cria dados iniciais ancorados no dia de hoje e salva no navegador
-      state.analyses = createInitialAnalyses();
-      state.feedItems = createInitialFeed();
+      // Primeira execução
       state.macroIndicators = createInitialMacroIndicators();
       state.marketAssets = createInitialMarketAssets();
+      state.analyses = createInitialAnalyses();
+      state.feedItems = createInitialFeed();
       ensureAllSchedulesExist();
       applyCalibrationToAllAnalyses();
       saveToBrowserStorage();
     }
 
-    function ensureAllSchedulesExist() {
-      state.analyses.forEach((anl) => {
-        const baseDay = anl.createdAt ? toDateStr(new Date(anl.createdAt)) : getTodayStr();
-        (anl.recommendations || []).forEach((rec) => {
-          if (!rec.schedule || !rec.schedule.buyStartDate) {
-            rec.schedule = buildDefaultSchedule(rec.horizon, baseDay);
-          }
-          if (typeof rec.userTrade === 'undefined') {
-            rec.userTrade = null;
-          }
-          if (!rec.feedback) {
-            rec.feedback = { status: 'Pendente', actualReturn: null, notes: '' };
-          }
-        });
-      });
+    // =========================================================================
+    // 7. MOTOR DE IA & FONTES REAIS DE DADOS (BRAPI, BCB, AWESOMEAPI, RSS, GEMINI)
+    // =========================================================================
+    function getStoredGeminiApiKey() {
+      try {
+        return (localStorage.getItem(API_KEY_STORAGE) || '').trim();
+      } catch (_) {
+        return '';
+      }
     }
 
-    function updateStorageBadge() {
-      const label = document.getElementById('sync-text');
-      const footer = document.getElementById('footer-storage-info');
-      const timeStr = state.lastSavedAt
-        ? new Date(state.lastSavedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        : '--:--';
-      if (label) label.textContent = `Salvo no Navegador (${timeStr})`;
-      if (footer) footer.textContent = `LocalStorage ativo • Último salvamento às ${timeStr}`;
+    function updateApiKeyIndicator() {
+      const key = getStoredGeminiApiKey();
+      const dot = document.getElementById('api-key-dot');
+      const label = document.getElementById('api-key-label');
+      if (dot) dot.className = key ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-amber-400';
+      if (label) label.textContent = key ? 'IA Ativa' : 'API IA';
     }
 
-    // =========================================================================
-    // 5. NOTIFICAÇÕES TOAST & ESCAPE HTML
-    // =========================================================================
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const colors = {
-        success: 'bg-emerald-950/95 border-emerald-500/50 text-emerald-200',
-        error:   'bg-rose-950/95 border-rose-500/50 text-rose-200',
-        warning: 'bg-amber-950/95 border-amber-500/50 text-amber-200',
-        info:    'bg-slate-900/95 border-sky-500/50 text-slate-200'
-      };
-      const el = document.createElement('div');
-      el.className = `pointer-events-auto border rounded-xl px-4 py-3 text-xs font-medium shadow-xl backdrop-blur-md flex items-center justify-between gap-3 fade-in ${colors[type] || colors.info}`;
-      el.innerHTML = `
-        <span>${escapeHtml(message)}</span>
-        <button class="opacity-70 hover:opacity-100 font-bold" onclick="this.parentElement.remove()">✕</button>
-      `;
-      container.appendChild(el);
-      setTimeout(() => {
-        if (el.parentElement) el.remove();
-      }, 4500);
-    }
+    window.openApiKeyModal = function () {
+      const input = document.getElementById('gemini-apikey-input');
+      if (input) input.value = getStoredGeminiApiKey();
+      const modal = document.getElementById('apikey-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
 
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
+    window.closeApiKeyModal = function () {
+      const modal = document.getElementById('apikey-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
 
-    // =========================================================================
-    // 6. MOTOR MATEMÁTICO DE CALIBRAÇÃO
-    // =========================================================================
-    function computeCalibratedMetrics(credScore, sentimentScore, macroScore, baseLossProb) {
-      const { wCred, wSent, wMacro, riskProfile } = state.calibration;
-      const totalW = wCred + wSent + wMacro || 100;
-      const nCred = wCred / totalW;
-      const nSent = wSent / totalW;
-      const nMacro = wMacro / totalW;
+    window.saveGeminiApiKey = function () {
+      const val = (document.getElementById('gemini-apikey-input')?.value || '').trim();
+      try {
+        if (val) localStorage.setItem(API_KEY_STORAGE, val);
+        else localStorage.removeItem(API_KEY_STORAGE);
+      } catch (_) {}
+      updateApiKeyIndicator();
+      closeApiKeyModal();
+      showToast(val ? 'Chave API Gemini salva no navegador! IA e Google Search ao vivo ativados.' : 'Chave removida; operando em modo direto + heurística.', 'success');
+    };
 
-      const absSent = Math.min(100, Math.abs(sentimentScore));
-      const iin = Math.round((nCred * credScore + nSent * absSent + nMacro * macroScore) * 10) / 10;
+    window.clearGeminiApiKey = function () {
+      try { localStorage.removeItem(API_KEY_STORAGE); } catch (_) {}
+      const input = document.getElementById('gemini-apikey-input');
+      if (input) input.value = '';
+      updateApiKeyIndicator();
+      closeApiKeyModal();
+      showToast('Chave API removida do navegador.', 'info');
+    };
 
-      const profileFactor = RISK_PROFILE_FACTORS[riskProfile] || 1.0;
-      const rawPap = baseLossProb * profileFactor * (1.35 - iin / 200);
-      const lossProb = Math.max(5, Math.min(92, Math.round(rawPap)));
-      const gainProb = 100 - lossProb;
-
-      return { iin, lossProb, gainProb, nCred, nSent, nMacro };
-    }
-
-    function applyCalibrationToAllAnalyses() {
-      state.analyses.forEach((anl) => {
-        const credScore = (CREDIBILITY_MAP[anl.credibilityKey] || CREDIBILITY_MAP.tier1).score;
-        const sample = computeCalibratedMetrics(credScore, anl.sentimentScore, anl.macroImpactScore || 70, 30);
-        anl.influenceScore = Math.round(sample.iin);
-
-        (anl.recommendations || []).forEach((rec) => {
-          const baseLoss = rec.baseLossProbability ?? rec.lossProbability ?? 35;
-          rec.baseLossProbability = baseLoss;
-          const calc = computeCalibratedMetrics(credScore, anl.sentimentScore, anl.macroImpactScore || 70, baseLoss);
-          rec.lossProbability = calc.lossProb;
-          rec.gainProbability = calc.gainProb;
-
-          const remaining = 100 - calc.lossProb;
-          const opt = Math.round(remaining * 0.55);
-          const base = Math.max(0, remaining - opt);
-          rec.scenarios = { optimistic: opt, base, pessimistic: calc.lossProb };
-        });
-      });
-    }
-
-    // =========================================================================
-    // 7. MOTOR DE IA (GEMINI API COM EXPONENTIAL BACKOFF + FALLBACK HEURÍSTICO)
-    // =========================================================================
     async function fetchGeminiWithBackoff(payload, maxRetries = 2) {
-      const apiKey = ""; // Injetado automaticamente pelo ambiente em tempo de execução
+      const apiKey = getStoredGeminiApiKey();
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-      let delay = 1000;
+      let delay = 900;
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           const response = await fetch(apiUrl, {
@@ -2238,15 +2194,138 @@
       }
     }
 
-    // Extrai JSON de respostas com Google Search Grounding (sem depender de responseSchema)
+    // Parse resiliente: aceita JSON puro, bloco markdown ou objeto/array embutido em texto
     function extractJsonFromText(rawText) {
       if (!rawText) return null;
-      const fenced = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
-      const candidate = fenced ? fenced[1].trim() : rawText.trim();
-      const firstBrace = candidate.search(/[\{\[]/);
-      const lastBrace = Math.max(candidate.lastIndexOf('}'), candidate.lastIndexOf(']'));
-      if (firstBrace === -1 || lastBrace === -1) return null;
-      return JSON.parse(candidate.slice(firstBrace, lastBrace + 1));
+      const cleaned = rawText.replace(/```json/gi, '```');
+      const fenced = cleaned.match(/```\s*([\s\S]*?)```/);
+      const candidate = fenced ? fenced[1].trim() : cleaned.trim();
+
+      try {
+        return JSON.parse(candidate);
+      } catch (_) {
+        const firstObj = candidate.indexOf('{');
+        const firstArr = candidate.indexOf('[');
+        let start = -1;
+        let end = -1;
+        if (firstArr !== -1 && (firstObj === -1 || firstArr < firstObj)) {
+          start = firstArr;
+          end = candidate.lastIndexOf(']');
+        } else if (firstObj !== -1) {
+          start = firstObj;
+          end = candidate.lastIndexOf('}');
+        }
+        if (start === -1 || end === -1 || end <= start) return null;
+        try {
+          return JSON.parse(candidate.slice(start, end + 1));
+        } catch (__) {
+          return null;
+        }
+      }
+    }
+
+    // Converte números formatados no padrão BR ("132.480,50" ou "R$ 391,20") ou US ("391.20")
+    function parseFlexibleNumber(val, fallback = 0) {
+      if (typeof val === 'number' && !isNaN(val)) return val;
+      if (!val) return fallback;
+      let s = String(val).replace(/[^\d,.-]/g, '').trim();
+      if (!s) return fallback;
+      if (s.includes(',') && s.includes('.')) {
+        if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+          s = s.replace(/\./g, '').replace(',', '.');
+        } else {
+          s = s.replace(/,/g, '');
+        }
+      } else if (s.includes(',')) {
+        s = s.replace(',', '.');
+      }
+      const n = parseFloat(s);
+      return isNaN(n) ? fallback : n;
+    }
+
+    // Consulta direta à Brapi API (cotações reais da B3 + histórico de fechamentos)
+    async function fetchBrapiQuote(ticker) {
+      const clean = ticker.toUpperCase().replace(':BVMF', '').trim();
+      const url = `https://brapi.dev/api/quote/${encodeURIComponent(clean)}?range=3mo&interval=1d`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Brapi HTTP ${res.status}`);
+      const data = await res.json();
+      const q = data?.results?.[0];
+      if (!q || !q.regularMarketPrice) throw new Error('Ticker não encontrado na Brapi');
+
+      const histRaw = Array.isArray(q.historicalDataPrice)
+        ? q.historicalDataPrice.map((h) => Number(h.close)).filter((v) => v > 0)
+        : [];
+      const price = Number(q.regularMarketPrice);
+      const changeDay = Number(q.regularMarketChangePercent || 0);
+      const firstHist = histRaw.length > 20 ? histRaw[histRaw.length - 21] : histRaw[0];
+      const change30d = firstHist && firstHist > 0 ? ((price - firstHist) / firstHist) * 100 : changeDay;
+
+      // Calcula volatilidade anualizada real a partir do histórico se disponível
+      let vol = 24;
+      if (histRaw.length >= 15) {
+        const rets = [];
+        for (let i = 1; i < histRaw.length; i++) {
+          rets.push(Math.log(histRaw[i] / histRaw[i - 1]));
+        }
+        const mean = rets.reduce((a, b) => a + b, 0) / rets.length;
+        const variance = rets.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / rets.length;
+        vol = Math.max(6, Math.min(85, Math.round(Math.sqrt(variance) * Math.sqrt(252) * 100)));
+      }
+
+      // Calcula RSI(14) real a partir do histórico
+      let rsi = 52;
+      if (histRaw.length >= 15) {
+        let gains = 0;
+        let losses = 0;
+        const slice14 = histRaw.slice(-15);
+        for (let i = 1; i < slice14.length; i++) {
+          const diff = slice14[i] - slice14[i - 1];
+          if (diff >= 0) gains += diff;
+          else losses -= diff;
+        }
+        const rs = losses === 0 ? 100 : gains / losses;
+        rsi = Math.round(100 - 100 / (1 + rs));
+      }
+
+      const isFii = clean.endsWith('11') && !['BOVA11', 'IVVB11', 'SMAL11', 'HASH11', 'BOVV11', 'XFIX11'].includes(clean);
+      const isEtf = ['BOVA11', 'IVVB11', 'SMAL11', 'HASH11', 'BOVV11', 'SPXI11', 'NASD11', 'QBTC11', 'ETHE11'].includes(clean);
+      const isBdr = clean.endsWith('34') || clean.endsWith('35') || clean.endsWith('39');
+
+      return {
+        ticker: clean,
+        gfSymbol: `${clean}:BVMF`,
+        name: q.longName || q.shortName || clean,
+        assetClass: isFii ? 'FII' : isEtf ? 'ETF' : isBdr ? 'BDR / Global' : 'Ação B3',
+        currency: q.currency === 'USD' ? 'US$' : 'R$',
+        price,
+        changeDay: Number(changeDay.toFixed(2)),
+        change30d: Number(change30d.toFixed(2)),
+        min52w: Number(q.fiftyTwoWeekLow || (price * 0.82).toFixed(2)),
+        max52w: Number(q.fiftyTwoWeekHigh || (price * 1.18).toFixed(2)),
+        pl: Number(q.priceEarnings || 0),
+        volatility: vol,
+        rsi,
+        histRaw,
+        dataSource: 'B3 / Brapi + Google Finanças'
+      };
+    }
+
+    // Consulta direta de Criptomoedas e Câmbio (AwesomeAPI)
+    async function fetchAwesomeQuote(pair) {
+      const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${pair}`);
+      if (!res.ok) throw new Error('AwesomeAPI indisponível');
+      const data = await res.json();
+      const key = pair.replace('-', '');
+      return data[key] || null;
+    }
+
+    // Consulta direta à API oficial do Banco Central do Brasil (Selic Meta série 432)
+    async function fetchBcbSelic() {
+      const res = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json');
+      if (!res.ok) throw new Error('BCB indisponível');
+      const arr = await res.json();
+      return arr?.[0]?.valor ? parseFlexibleNumber(arr[0].valor, null) : null;
     }
 
     function extractGroundingSources(result) {
@@ -2483,7 +2562,7 @@ Gere 1 ou 2 recomendações relevantes.`;
     }
 
     // =========================================================================
-    // 7B. COLETA AUTOMÁTICA DE NOTÍCIAS & GOOGLE FINANÇAS (SEARCH GROUNDING)
+    // 7B. COLETA AUTOMÁTICA DE NOTÍCIAS & GOOGLE FINANÇAS (MULTI-CAMADA REAL)
     // =========================================================================
     function renderMacroTickerStrip() {
       const strip = document.getElementById('macro-ticker-strip');
@@ -2509,45 +2588,158 @@ Gere 1 ou 2 recomendações relevantes.`;
     window.refreshMacroFromGoogleFinance = async function () {
       const btn = document.getElementById('btn-refresh-macro');
       if (btn) btn.disabled = true;
-      showToast('Consultando índices macro no Google Finanças ao vivo...', 'info');
+      showToast('Atualizando índices macro (BCB, Câmbio, B3 e Google Finanças)...', 'info');
 
+      let updatedAny = false;
+
+      // 1. Consulta paralela às APIs financeiras diretas (sem bloqueio de CORS)
+      const [usdRes, btcRes, selicVal, ibovRes, ifixRes] = await Promise.allSettled([
+        fetchAwesomeQuote('USD-BRL'),
+        fetchAwesomeQuote('BTC-USD'),
+        fetchBcbSelic(),
+        fetchBrapiQuote('^BVSP'),
+        fetchBrapiQuote('XFIX11')
+      ]);
+
+      const nextMacro = [...(state.macroIndicators || createInitialMacroIndicators())];
+      const setItem = (sym, patch) => {
+        const idx = nextMacro.findIndex((m) => m.symbol === sym);
+        if (idx >= 0) nextMacro[idx] = { ...nextMacro[idx], ...patch };
+      };
+
+      if (ibovRes.status === 'fulfilled' && ibovRes.value?.price) {
+        setItem('IBOV', {
+          value: Math.round(ibovRes.value.price).toLocaleString('pt-BR'),
+          changePct: ibovRes.value.changeDay,
+          source: 'B3 / Brapi'
+        });
+        updatedAny = true;
+      }
+      if (ifixRes.status === 'fulfilled' && ifixRes.value?.price) {
+        setItem('IFIX', {
+          value: `R$ ${ifixRes.value.price.toFixed(2).replace('.', ',')}`,
+          label: 'XFIX11 (IFIX)',
+          changePct: ifixRes.value.changeDay,
+          source: 'B3'
+        });
+        updatedAny = true;
+      }
+      if (usdRes.status === 'fulfilled' && usdRes.value?.bid) {
+        const bid = parseFlexibleNumber(usdRes.value.bid, 0);
+        const pct = parseFlexibleNumber(usdRes.value.pctChange, 0);
+        if (bid > 0) {
+          setItem('USDBRL', {
+            value: `R$ ${bid.toFixed(2).replace('.', ',')}`,
+            changePct: pct,
+            source: 'AwesomeAPI'
+          });
+          updatedAny = true;
+        }
+      }
+      if (selicVal.status === 'fulfilled' && selicVal.value !== null) {
+        setItem('SELIC', {
+          value: `${selicVal.value.toFixed(2).replace('.', ',')}% a.a.`,
+          changePct: 0,
+          source: 'BCB Oficial'
+        });
+        updatedAny = true;
+      }
+      if (btcRes.status === 'fulfilled' && btcRes.value?.bid) {
+        const bid = parseFlexibleNumber(btcRes.value.bid, 0);
+        const pct = parseFlexibleNumber(btcRes.value.pctChange, 0);
+        if (bid > 0) {
+          setItem('BTC', {
+            value: `US$ ${Math.round(bid).toLocaleString('pt-BR')}`,
+            changePct: pct,
+            source: 'Cripto Live'
+          });
+          updatedAny = true;
+        }
+      }
+
+      // 2. Complementa S&P 500 e demais via Gemini + Google Search
       try {
         const payload = {
           contents: [{
             parts: [{
-              text: `Busque no Google Finanças e Banco Central as cotações mais recentes de hoje para: IBOVESPA (IBOV), IFIX, Dólar (USD/BRL), Taxa Selic Meta atual, S&P 500 e Bitcoin (BTC/USD).
-Retorne EXCLUSIVAMENTE um JSON array válido neste formato:
-[{"symbol":"IBOV","label":"IBOVESPA","value":"130.000","changePct":0.5,"source":"Google Finanças"}]`
+              text: `Busque no Google Finanças a cotação atual de hoje para S&P 500 (INDEXSP: .INX) e IBOVESPA (INDEXBVMF: IBOV).
+Responda somente JSON:
+[{"symbol":"SPX","label":"S&P 500","value":"6.000","changePct":0.3},{"symbol":"IBOV","label":"IBOVESPA","value":"130.000","changePct":0.4}]`
             }]
           }],
           tools: [{ google_search: {} }]
         };
-
         const result = await fetchGeminiWithBackoff(payload, 1);
         const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
         const parsed = extractJsonFromText(text);
-        if (Array.isArray(parsed) && parsed.length >= 3) {
-          state.macroIndicators = parsed.map((m) => ({
-            symbol: m.symbol || 'IDX',
-            label: m.label || m.symbol || 'Índice',
-            value: String(m.value || '--'),
-            changePct: Number(m.changePct) || 0,
-            source: m.source || 'Google Finanças'
-          }));
-          saveToBrowserStorage();
-          renderMacroTickerStrip();
-          showToast('Índices macro atualizados via Google Finanças!', 'success');
-        } else {
-          throw new Error('Formato inesperado');
+        if (Array.isArray(parsed)) {
+          parsed.forEach((m) => {
+            if (m.symbol && m.value) {
+              setItem(m.symbol, {
+                value: String(m.value),
+                changePct: parseFlexibleNumber(m.changePct, 0),
+                source: 'Google Finanças'
+              });
+              updatedAny = true;
+            }
+          });
         }
-      } catch (err) {
-        showToast('Não foi possível atualizar ao vivo agora. Mantendo última leitura salva.', 'warning');
-      } finally {
-        if (btn) btn.disabled = false;
+      } catch (_) {
+        // Segue com os dados reais obtidos pelas APIs diretas
       }
+
+      if (updatedAny) {
+        state.macroIndicators = nextMacro;
+        saveToBrowserStorage();
+        renderMacroTickerStrip();
+        showToast('Indicadores macro atualizados com dados reais de mercado!', 'success');
+      } else {
+        showToast('Não foi possível conectar às fontes externas agora. Verifique sua conexão.', 'warning');
+      }
+
+      if (btn) btn.disabled = false;
     };
 
-    // Coletor automático de notícias reais (Google Finanças, BCB, CVM, Valor, InfoMoney, Reuters)
+    // Busca notícias financeiras reais via RSS convertido em JSON (fallback confiável sem CORS)
+    async function fetchFinancialRssNews(topicQuery) {
+      const q = encodeURIComponent(`${topicQuery} mercado financeiro`);
+      const rssUrl = `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+      const res = await fetch(apiUrl);
+      if (!res.ok) throw new Error('RSS indisponível');
+      const data = await res.json();
+      if (!Array.isArray(data.items) || data.items.length === 0) throw new Error('RSS vazio');
+
+      return data.items.slice(0, 5).map((item) => {
+        const rawTitle = (item.title || '').trim();
+        const parts = rawTitle.split(' - ');
+        const source = parts.length > 1 ? parts.pop().trim() : 'Google Notícias Finanças';
+        const title = parts.join(' - ').trim() || rawTitle;
+        const cleanDesc = (item.description || '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        const lowerSrc = source.toLowerCase();
+        const credKey = (lowerSrc.includes('banco central') || lowerSrc.includes('cvm') || lowerSrc.includes('gov.br'))
+          ? 'official'
+          : (lowerSrc.includes('valor') || lowerSrc.includes('infomoney') || lowerSrc.includes('reuters') || lowerSrc.includes('bloomberg') || lowerSrc.includes('exame') || lowerSrc.includes('estadão') || lowerSrc.includes('folha'))
+            ? 'tier1'
+            : 'general';
+
+        return {
+          source,
+          credibilityKey: credKey,
+          url: item.link || 'https://www.google.com/finance',
+          title,
+          content: cleanDesc && cleanDesc.length > 35
+            ? cleanDesc
+            : `Manchete coletada em tempo real via Google Notícias Finanças (${source}). Clique em "Analisar com IA" para avaliar o impacto probabilístico nos ativos relacionados.`
+        };
+      });
+    }
+
+    // Coletor automático de notícias reais (Camada 1: Gemini + Google Search | Camada 2: RSS Google Finanças BR)
     window.collectRealTimeNews = async function (autoAnalyzeTop1 = false) {
       const btn = document.getElementById('btn-auto-collect-now');
       const btnText = document.getElementById('btn-collect-now-text');
@@ -2555,24 +2747,20 @@ Retorne EXCLUSIVAMENTE um JSON array válido neste formato:
       if (btn) btn.disabled = true;
       if (btnText) btnText.textContent = 'Coletando ao vivo...';
 
-      showToast(`Coletando notícias em tempo real (${topic.slice(0, 34)}...)`, 'info');
+      showToast(`Coletando notícias reais (${topic.slice(0, 34)}...)`, 'info');
 
+      let collectedList = [];
+      let sources = [];
+
+      // Camada 1: Gemini com Google Search Grounding
       try {
         const today = getTodayStr();
         const payload = {
           contents: [{
             parts: [{
-              text: `Hoje é ${today}. Pesquise no Google Finanças, Banco Central, CVM, Valor Econômico, InfoMoney, Reuters e Bloomberg as 4 notícias mais relevantes e recentes sobre: "${topic}".
-Retorne EXCLUSIVAMENTE um JSON array válido com exatamente 4 itens no formato:
-[
-  {
-    "source": "Nome do Veículo",
-    "credibilityKey": "official" | "tier1" | "general",
-    "url": "https://...",
-    "title": "Manchete clara e objetiva em português",
-    "content": "Resumo técnico de 2 a 3 frases explicando o fato e quais ativos/setores podem ser afetados."
-  }
-]`
+              text: `Hoje é ${today}. Pesquise notícias financeiras recentes de hoje sobre: "${topic}".
+Retorne APENAS um JSON array com 4 notícias reais:
+[{"source":"Veículo","credibilityKey":"tier1","url":"https://...","title":"Título","content":"Resumo de 2 frases"}]`
             }]
           }],
           tools: [{ google_search: {} }]
@@ -2581,18 +2769,35 @@ Retorne EXCLUSIVAMENTE um JSON array válido com exatamente 4 itens no formato:
         const result = await fetchGeminiWithBackoff(payload, 1);
         const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
         const parsed = extractJsonFromText(text);
-        const sources = extractGroundingSources(result);
+        sources = extractGroundingSources(result);
 
-        if (!Array.isArray(parsed) || parsed.length === 0) {
-          throw new Error('Sem notícias estruturadas');
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          collectedList = parsed;
+        }
+      } catch (_) {
+        // Aciona camada 2 (RSS ao vivo)
+      }
+
+      // Camada 2: Fallback automático via RSS Google Notícias Finanças (tempo real sem CORS)
+      if (collectedList.length === 0) {
+        try {
+          collectedList = await fetchFinancialRssNews(topic);
+        } catch (_) {
+          // Segue para tratamento abaixo
+        }
+      }
+
+      try {
+        if (collectedList.length === 0) {
+          throw new Error('Nenhuma fonte retornou notícias');
         }
 
         const nowLabel = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         let addedCount = 0;
         let firstNewItem = null;
 
-        parsed.reverse().forEach((n, idx) => {
-          if (!n.title || !n.content) return;
+        collectedList.reverse().forEach((n, idx) => {
+          if (!n.title) return;
           const dup = state.feedItems.some((f) => f.title.toLowerCase() === String(n.title).toLowerCase());
           if (dup) return;
 
@@ -2603,7 +2808,7 @@ Retorne EXCLUSIVAMENTE um JSON array válido com exatamente 4 itens no formato:
             url: n.url || sources[idx]?.uri || 'https://www.google.com/finance',
             date: `AO VIVO • ${nowLabel}`,
             title: n.title,
-            content: n.content,
+            content: n.content || n.title,
             isLive: true,
             citations: sources
           };
@@ -2618,7 +2823,7 @@ Retorne EXCLUSIVAMENTE um JSON array válido com exatamente 4 itens no formato:
         updateAutoCollectStatusPill();
 
         if (addedCount > 0) {
-          showToast(`${addedCount} notícias reais coletadas do Google Finanças & Portais!`, 'success');
+          showToast(`${addedCount} notícias reais coletadas do mercado!`, 'success');
           if (autoAnalyzeTop1 && firstNewItem) {
             await processNewsItem(firstNewItem);
           }
@@ -2626,7 +2831,7 @@ Retorne EXCLUSIVAMENTE um JSON array válido com exatamente 4 itens no formato:
           showToast('Feed já está atualizado com as manchetes mais recentes.', 'info');
         }
       } catch (err) {
-        showToast('Busca ao vivo indisponível neste momento. Use o feed local ou importador manual/URL.', 'warning');
+        showToast('Não foi possível acessar as notícias externas neste momento. Você pode colar uma notícia manualmente ao lado.', 'warning');
       } finally {
         if (btn) btn.disabled = false;
         if (btnText) btnText.textContent = 'Coletar Notícias Agora';
@@ -2762,41 +2967,73 @@ Retorne EXCLUSIVAMENTE um JSON array válido com exatamente 4 itens no formato:
       if (btn) btn.disabled = true;
       if (btnText) btnText.textContent = `Buscando ${rawTicker}...`;
 
-      showToast(`Consultando ${rawTicker} no Google Finanças ao vivo...`, 'info');
+      showToast(`Buscando cotação real de ${rawTicker} (B3 / Google Finanças)...`, 'info');
 
+      const existingLocal = state.marketAssets.find((a) => a.ticker.toUpperCase() === rawTicker);
+      let brapiData = null;
+      let geminiData = null;
+      let citations = [];
+
+      // Camada 1: Consulta direta em tempo real na B3 (Brapi) ou Cripto (AwesomeAPI)
+      try {
+        if (rawTicker === 'BTC' || rawTicker === 'BITCOIN') {
+          const btc = await fetchAwesomeQuote('BTC-BRL');
+          if (btc?.bid) {
+            const p = parseFlexibleNumber(btc.bid, 0);
+            brapiData = {
+              ticker: 'BTC',
+              gfSymbol: 'BTC-BRL',
+              name: 'Bitcoin (BTC / BRL)',
+              assetClass: 'Cripto',
+              currency: 'R$',
+              price: p,
+              changeDay: parseFlexibleNumber(btc.pctChange, 0),
+              change30d: parseFlexibleNumber(btc.pctChange, 0) * 3,
+              min52w: Number((p * 0.55).toFixed(2)),
+              max52w: Number((p * 1.15).toFixed(2)),
+              pl: 0,
+              volatility: 58,
+              rsi: 58,
+              histRaw: [],
+              dataSource: 'Mercado Cripto (Ao Vivo)'
+            };
+          }
+        } else {
+          brapiData = await fetchBrapiQuote(rawTicker);
+        }
+      } catch (_) {
+        // Segue para camada 2 (Gemini + Google Search)
+      }
+
+      // Camada 2: Consulta ao Google Finanças via Gemini Search Grounding (enriquece fundamentos e notícias ou fornece cotação de ativos EUA/globais)
       try {
         const payload = {
           contents: [{
             parts: [{
-              text: `Pesquise no Google Finanças (google.com/finance) e portais financeiros brasileiros/globais os dados reais mais recentes do ativo "${rawTicker}".
-Retorne EXCLUSIVAMENTE um objeto JSON válido neste formato exato:
+              text: `Busque no Google Finanças (google.com/finance) a cotação atual de hoje para "${rawTicker}".
+Retorne APENAS um JSON válido:
 {
   "ticker": "${rawTicker}",
-  "gfSymbol": "EXEMPLO:BVMF ou NASDAQ",
-  "name": "Nome completo da empresa, fundo ou ETF",
+  "gfSymbol": "TICKER:BVMF ou NASDAQ",
+  "name": "Nome oficial do ativo",
   "assetClass": "Ação B3" | "FII" | "ETF" | "BDR / Global" | "Fundo / RF" | "Cripto",
   "sector": "Petróleo & Energia" | "Bancos & Financeiro" | "Mineração & Indústria" | "Imobiliário" | "Tecnologia & IA" | "Índices & Macro" | "Soberano & Crédito" | "Criptoativos",
   "currency": "R$" | "US$",
-  "price": 38.50,
-  "changeDay": 0.85,
-  "change30d": 4.20,
-  "change12m": 15.0,
-  "dy": 8.5,
-  "plOrPvpLabel": "P/L" ou "P/VP",
-  "plOrPvp": 7.5,
-  "min52w": 30.0,
-  "max52w": 44.0,
-  "volatility": 28,
-  "rsi": 55,
+  "price": 0.00,
+  "changeDay": 0.00,
+  "change30d": 0.00,
+  "change12m": 0.00,
+  "dy": 0.00,
+  "plOrPvpLabel": "P/L",
+  "plOrPvp": 0.00,
+  "volatility": 25,
+  "rsi": 52,
   "beta": 1.0,
-  "liquidity": "R$ 150 mi/dia",
   "riskLevel": "Baixo" | "Moderado" | "Alto" | "Especulativo",
   "bias": "Compra" | "Neutro" | "Cautela/Venda",
-  "score": 80,
-  "support": 35.0,
-  "resistance": 42.0,
-  "summary": "Análise fundamentalista e de momento em 2 frases em português.",
-  "recentNews": ["Manchete recente 1 sobre o ativo", "Manchete recente 2 sobre o ativo"]
+  "score": 78,
+  "summary": "Resumo objetivo do momento do ativo em 2 frases.",
+  "recentNews": ["Manchete recente sobre o ativo"]
 }`
             }]
           }],
@@ -2805,49 +3042,67 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido neste formato exato:
 
         const result = await fetchGeminiWithBackoff(payload, 1);
         const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
-        const parsed = extractJsonFromText(text);
-        const citations = extractGroundingSources(result);
+        geminiData = extractJsonFromText(text);
+        citations = extractGroundingSources(result);
+      } catch (_) {
+        // Se Brapi funcionou, já temos o preço real
+      }
 
-        if (!parsed || !parsed.price) {
-          throw new Error('Dados incompletos do ativo');
+      try {
+        const finalPrice = brapiData?.price || parseFlexibleNumber(geminiData?.price, 0);
+        if (!finalPrice || finalPrice <= 0) {
+          throw new Error('Cotação não retornada pelas fontes');
         }
 
-        const cleanTicker = String(parsed.ticker || rawTicker).toUpperCase();
-        const priceNum = Number(parsed.price) || 10;
-        const volNum = Math.max(5, Math.min(90, Number(parsed.volatility) || 26));
-        const ch30 = Number(parsed.change30d) || 0;
+        const cleanTicker = (brapiData?.ticker || geminiData?.ticker || rawTicker).toUpperCase();
+        const chDay = brapiData ? brapiData.changeDay : parseFlexibleNumber(geminiData?.changeDay, 0);
+        const ch30 = brapiData ? brapiData.change30d : parseFlexibleNumber(geminiData?.change30d, existingLocal?.change30d || 0);
+        const volNum = brapiData?.volatility || Math.max(5, Math.min(90, parseFlexibleNumber(geminiData?.volatility, existingLocal?.volatility || 24)));
+        const rsiNum = brapiData?.rsi || Math.max(10, Math.min(90, Math.round(parseFlexibleNumber(geminiData?.rsi, existingLocal?.rsi || 52))));
+        const dyNum = Math.max(0, parseFlexibleNumber(geminiData?.dy, existingLocal?.dy || 0));
+
+        // Monta histórico real (se veio da Brapi) ou série calibrada ao preço real de hoje
+        let history252;
+        if (brapiData?.histRaw && brapiData.histRaw.length >= 20) {
+          const older = generateHistoricalSeries(brapiData.histRaw[0], ch30, volNum, Math.max(30, 252 - brapiData.histRaw.length), cleanTicker);
+          history252 = [...older, ...brapiData.histRaw];
+        } else {
+          history252 = generateHistoricalSeries(finalPrice, ch30, volNum, 252, cleanTicker);
+        }
 
         const assetObj = {
           ticker: cleanTicker,
-          gfSymbol: parsed.gfSymbol || (/^[A-Z]{4}\d{1,2}$/.test(cleanTicker) ? `${cleanTicker}:BVMF` : cleanTicker),
-          name: parsed.name || cleanTicker,
-          assetClass: parsed.assetClass || 'Ação B3',
-          sector: parsed.sector || 'Índices & Macro',
-          currency: parsed.currency || 'R$',
-          price: priceNum,
-          changeDay: Number(parsed.changeDay) || 0,
-          change30d: ch30,
-          change12m: Number(parsed.change12m) || 0,
-          dy: Math.max(0, Number(parsed.dy) || 0),
-          plOrPvpLabel: parsed.plOrPvpLabel || 'P/L',
-          plOrPvp: Number(parsed.plOrPvp) || 0,
-          min52w: Number(parsed.min52w) || Number((priceNum * 0.8).toFixed(2)),
-          max52w: Number(parsed.max52w) || Number((priceNum * 1.2).toFixed(2)),
+          gfSymbol: brapiData?.gfSymbol || geminiData?.gfSymbol || existingLocal?.gfSymbol || (/^[A-Z]{4}\d{1,2}$/.test(cleanTicker) ? `${cleanTicker}:BVMF` : cleanTicker),
+          name: brapiData?.name || geminiData?.name || existingLocal?.name || cleanTicker,
+          assetClass: brapiData?.assetClass || geminiData?.assetClass || existingLocal?.assetClass || 'Ação B3',
+          sector: geminiData?.sector || existingLocal?.sector || 'Índices & Macro',
+          currency: brapiData?.currency || geminiData?.currency || existingLocal?.currency || 'R$',
+          price: Number(finalPrice.toFixed(2)),
+          changeDay: Number(chDay.toFixed(2)),
+          change30d: Number(ch30.toFixed(2)),
+          change12m: parseFlexibleNumber(geminiData?.change12m, existingLocal?.change12m || 0),
+          dy: dyNum,
+          plOrPvpLabel: geminiData?.plOrPvpLabel || existingLocal?.plOrPvpLabel || 'P/L',
+          plOrPvp: brapiData?.pl || parseFlexibleNumber(geminiData?.plOrPvp, existingLocal?.plOrPvp || 0),
+          min52w: brapiData?.min52w || parseFlexibleNumber(geminiData?.min52w, Number((finalPrice * 0.82).toFixed(2))),
+          max52w: brapiData?.max52w || parseFlexibleNumber(geminiData?.max52w, Number((finalPrice * 1.18).toFixed(2))),
           volatility: volNum,
-          rsi: Math.max(10, Math.min(90, Number(parsed.rsi) || 52)),
-          beta: Number(parsed.beta) || 1.0,
-          liquidity: parsed.liquidity || 'Alta',
-          riskLevel: normalizeRisk(parsed.riskLevel),
-          bias: parsed.bias || 'Neutro',
-          score: Math.max(20, Math.min(98, Math.round(Number(parsed.score) || 74))),
-          support: Number(parsed.support) || Number((priceNum * 0.94).toFixed(2)),
-          resistance: Number(parsed.resistance) || Number((priceNum * 1.08).toFixed(2)),
-          summary: parsed.summary || 'Dados coletados em tempo real via Google Finanças.',
-          recentNews: Array.isArray(parsed.recentNews) ? parsed.recentNews.slice(0, 3) : [],
-          dataSource: 'Google Finanças (Ao Vivo)',
+          rsi: rsiNum,
+          beta: parseFlexibleNumber(geminiData?.beta, existingLocal?.beta || 1.0),
+          liquidity: existingLocal?.liquidity || 'Alta (B3/Global)',
+          riskLevel: normalizeRisk(geminiData?.riskLevel || existingLocal?.riskLevel || (volNum > 45 ? 'Especulativo' : volNum > 30 ? 'Alto' : volNum < 15 ? 'Baixo' : 'Moderado')),
+          bias: geminiData?.bias || (rsiNum <= 38 ? 'Compra' : rsiNum >= 72 ? 'Cautela/Venda' : existingLocal?.bias || 'Compra'),
+          score: Math.max(20, Math.min(98, Math.round(parseFlexibleNumber(geminiData?.score, existingLocal?.score || 78)))),
+          support: Number((finalPrice * 0.945).toFixed(2)),
+          resistance: Number((finalPrice * 1.075).toFixed(2)),
+          summary: geminiData?.summary || existingLocal?.summary || `Cotação real atualizada para ${cleanTicker} (${brapiData?.dataSource || 'Google Finanças'}) com projeção probabilística recalculada.`,
+          recentNews: Array.isArray(geminiData?.recentNews) && geminiData.recentNews.length > 0
+            ? geminiData.recentNews.slice(0, 3)
+            : (existingLocal?.recentNews || []),
+          dataSource: brapiData ? brapiData.dataSource : 'Google Finanças (Ao Vivo)',
           updatedAt: new Date().toISOString(),
           citations,
-          history252: generateHistoricalSeries(priceNum, ch30, volNum, 252, cleanTicker)
+          history252
         };
 
         const existingIdx = state.marketAssets.findIndex((a) => a.ticker.toUpperCase() === cleanTicker);
@@ -2860,7 +3115,7 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido neste formato exato:
         state.selectedMarketTicker = cleanTicker;
         saveToBrowserStorage();
         renderMarketTab();
-        showToast(`${cleanTicker} atualizado ao vivo via Google Finanças e salvo no navegador!`, 'success');
+        showToast(`${cleanTicker} atualizado com preço real (${assetObj.currency} ${assetObj.price.toFixed(2)})!`, 'success');
       } catch (err) {
         const localMatch = state.marketAssets.find((a) =>
           a.ticker.toUpperCase().includes(rawTicker) || a.name.toUpperCase().includes(rawTicker)
@@ -2868,9 +3123,9 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido neste formato exato:
         if (localMatch) {
           state.selectedMarketTicker = localMatch.ticker;
           renderMarketTab();
-          showToast(`Google Finanças ao vivo indisponível agora. Exibindo dados locais de ${localMatch.ticker}.`, 'warning');
+          showToast(`Consulta externa falhou para ${rawTicker}. Você pode clicar no ícone de lápis ao lado do preço para ajustar manualmente.`, 'warning');
         } else {
-          showToast(`Não foi possível consultar ${rawTicker} ao vivo no momento. Tente novamente ou selecione um ativo da lista.`, 'error');
+          showToast(`Não foi possível obter a cotação de ${rawTicker} agora. Verifique o código do ticker (ex: IVVB11, PETR4, MXRF11).`, 'error');
         }
       } finally {
         if (btn) btn.disabled = false;
@@ -2882,6 +3137,51 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido neste formato exato:
       if (state.selectedMarketTicker) {
         searchGoogleFinanceLive(state.selectedMarketTicker);
       }
+    };
+
+    window.openQuickPriceModal = function () {
+      const asset = state.marketAssets.find((a) => a.ticker === state.selectedMarketTicker);
+      if (!asset) return;
+      document.getElementById('price-modal-subtitle').textContent = `${asset.ticker} • ${asset.name}`;
+      document.getElementById('quick-price-input').value = asset.price;
+      document.getElementById('quick-day-input').value = asset.changeDay;
+      document.getElementById('quick-dy-input').value = asset.dy;
+      const modal = document.getElementById('price-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeQuickPriceModal = function () {
+      const modal = document.getElementById('price-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.saveQuickPriceModal = function () {
+      const asset = state.marketAssets.find((a) => a.ticker === state.selectedMarketTicker);
+      if (!asset) return;
+      const newPrice = parseFloat(document.getElementById('quick-price-input').value);
+      const newDay = parseFloat(document.getElementById('quick-day-input').value);
+      const newDy = parseFloat(document.getElementById('quick-dy-input').value);
+
+      if (isNaN(newPrice) || newPrice <= 0) {
+        showToast('Informe um preço válido maior que zero.', 'warning');
+        return;
+      }
+
+      asset.price = Number(newPrice.toFixed(2));
+      if (!isNaN(newDay)) asset.changeDay = Number(newDay.toFixed(2));
+      if (!isNaN(newDy) && newDy >= 0) asset.dy = Number(newDy.toFixed(2));
+      asset.support = Number((asset.price * 0.945).toFixed(2));
+      asset.resistance = Number((asset.price * 1.075).toFixed(2));
+      asset.dataSource = 'Ajuste Manual (Hoje)';
+      asset.updatedAt = new Date().toISOString();
+      asset.history252 = generateHistoricalSeries(asset.price, asset.change30d, asset.volatility, 252, asset.ticker);
+
+      saveToBrowserStorage();
+      closeQuickPriceModal();
+      renderMarketTab();
+      showToast(`Cotação de ${asset.ticker} atualizada para ${asset.currency} ${asset.price.toFixed(2)}!`, 'success');
     };
 
     window.selectMarketAsset = function (ticker) {
@@ -4712,6 +5012,7 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido neste formato exato:
 
     function bootstrapApp() {
       loadFromBrowserStorage();
+      updateApiKeyIndicator();
       syncCalibrationControlsFromState();
       setupAutoCollectTimer();
       switchTab('dashboard');
