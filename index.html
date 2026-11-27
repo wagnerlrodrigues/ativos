@@ -11,6 +11,9 @@
   <!-- Chart.js para gráficos interativos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
+  <!-- Supabase JS SDK (CDN para hospedagem estática no GitHub Pages) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,7 +42,6 @@
   </script>
 
   <style>
-    /* Estilização customizada para barra de rolagem, sliders e animações */
     body {
       background-color: #090d16;
       color: #e2e8f0;
@@ -114,7 +116,7 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
 
-  <!-- Container de Notificações Toast (substitui alert/confirm) -->
+  <!-- Container de Notificações Toast -->
   <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
   <!-- Cabeçalho / Barra Superior -->
@@ -125,7 +127,7 @@
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
             <svg class="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8m0 0h-6m6 0v6" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8m0 0h-6m6 0v6"></path>
             </svg>
           </div>
           <div class="truncate">
@@ -135,17 +137,25 @@
                 TERMINAL IA
               </span>
             </div>
-            <p class="text-[11px] text-slate-400 truncate">Notícias Automáticas, Google Finanças, Calendário & Projeções</p>
+            <p class="text-[11px] text-slate-400 truncate">Notícias Automáticas, Google Finanças, Calendário &amp; Projeções</p>
           </div>
         </div>
 
-        <!-- Status do Salvamento no Navegador e Ação Rápida -->
+        <!-- Status do Salvamento no Navegador / Supabase e Ação Rápida -->
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div id="sync-status-badge" class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300" title="Todos os dados são salvos automaticamente no navegador (localStorage)">
+          <div id="sync-status-badge" onclick="openCloudModal()" class="cursor-pointer hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 transition" title="Clique para configurar sincronização em nuvem (Supabase + GitHub Pages)">
             <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span id="sync-text" class="font-mono text-[11px]">Salvo no Navegador</span>
+            <span id="sync-text" class="font-mono text-[11px]">Salvo Localmente</span>
           </div>
-          <button onclick="openApiKeyModal()" id="btn-api-key-status" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px] transition" title="Configure sua chave gratuita do Google Gemini para ativar IA ao vivo no Live Server / navegador local">
+          <button onclick="openAlertsModal()" id="btn-alerts" class="relative inline-flex items-center justify-center p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition" title="Central de Alertas de Timing, Zona Verde e Saída">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span id="alerts-badge-count" class="hidden absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-mono text-[9px] font-extrabold">0</span>
+          </button>
+          <button onclick="openCloudModal()" id="btn-cloud-status" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px] transition" title="Conta, Autenticação e Banco de Dados Supabase">
+            <span id="cloud-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+            <span class="hidden sm:inline" id="cloud-label">Supabase</span>
+          </button>
+          <button onclick="openApiKeyModal()" id="btn-api-key-status" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px] transition" title="Configure sua chave gratuita do Google Gemini para ativar IA ao vivo">
             <span id="api-key-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
             <span class="hidden md:inline" id="api-key-label">API IA</span>
           </button>
@@ -165,25 +175,29 @@
 
       <!-- Navegação em Abas Responsiva -->
       <nav class="flex items-center gap-1 overflow-x-auto pb-2 pt-1 -mx-1 px-1 no-scrollbar" aria-label="Navegação Principal">
-        <button data-tab="dashboard" onclick="switchTab('dashboard')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          Dashboard & Calendário
+        <button data-tab="dashboard" onclick="switchTab('dashboard')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Dashboard &amp; Calendário
         </button>
-        <button data-tab="market" onclick="switchTab('market')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-          Mercado & Google Finanças
+        <button data-tab="portfolio" onclick="switchTab('portfolio')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+          Carteira &amp; Gestão de Risco
         </button>
-        <button data-tab="news" onclick="switchTab('news')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-          Notícias & Coleta Auto
+        <button data-tab="market" onclick="switchTab('market')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+          Mercado &amp; Google Finanças
         </button>
-        <button data-tab="calibration" onclick="switchTab('calibration')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-          Métricas & Calibração
+        <button data-tab="news" onclick="switchTab('news')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+          Notícias &amp; Coleta Auto
         </button>
-        <button data-tab="history" onclick="switchTab('history')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          Histórico, Compras & Feedback
+        <button data-tab="calibration" onclick="switchTab('calibration')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+          Métricas &amp; Calibração
+        </button>
+        <button data-tab="history" onclick="switchTab('history')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Histórico, Compras &amp; Feedback
         </button>
       </nav>
     </div>
@@ -191,11 +205,9 @@
     <!-- Barra Macroeconômica (Ticker Strip - Google Finanças / BCB) -->
     <div class="border-t border-slate-800/70 bg-[#060911]/95">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between gap-3">
-        <div id="macro-ticker-strip" class="flex items-center gap-4 overflow-x-auto no-scrollbar text-[11px] font-mono whitespace-nowrap py-0.5">
-          <!-- Renderizado via JS -->
-        </div>
+        <div id="macro-ticker-strip" class="flex items-center gap-4 overflow-x-auto no-scrollbar text-[11px] font-mono whitespace-nowrap py-0.5"></div>
         <button id="btn-refresh-macro" onclick="refreshMacroFromGoogleFinance()" class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[10px] font-mono text-sky-300 transition" title="Atualizar índices macro via Google Finanças + Pesquisa ao Vivo">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
           <span class="hidden sm:inline">Atualizar Macro</span>
         </button>
       </div>
@@ -215,12 +227,12 @@
           <div class="flex items-center justify-between">
             <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Notícias Analisadas</span>
             <span class="p-2 rounded-xl bg-sky-500/10 text-sky-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             </span>
           </div>
           <div class="mt-3 flex items-baseline gap-2">
             <span id="kpi-total-news" class="text-3xl font-bold font-mono text-white">0</span>
-            <span class="text-xs text-slate-400">salvas localmente</span>
+            <span class="text-xs text-slate-400">salvas</span>
           </div>
         </div>
 
@@ -228,11 +240,11 @@
           <div class="flex items-center justify-between">
             <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Sentimento de Mercado</span>
             <span class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
             </span>
           </div>
           <div class="mt-3 flex items-baseline gap-2">
-            <span id="kpi-sentiment" class="text-3xl font-bold font-mono text-emerald-400">+0</span>
+            <span id="kpi-sentiment" class="text-3xl font-bold font-mono text-emerald-400">0</span>
             <span id="kpi-sentiment-label" class="text-xs text-slate-400">Neutro</span>
           </div>
         </div>
@@ -241,12 +253,12 @@
           <div class="flex items-center justify-between">
             <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Minhas Compras</span>
             <span class="p-2 rounded-xl bg-violet-500/10 text-violet-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
             </span>
           </div>
           <div class="mt-3 flex items-baseline gap-2">
             <span id="kpi-user-trades" class="text-3xl font-bold font-mono text-violet-400">0</span>
-            <span id="kpi-user-trades-sub" class="text-xs text-slate-400">na zona verde</span>
+            <span id="kpi-user-trades-sub" class="text-xs text-slate-400">0 na zona verde</span>
           </div>
         </div>
 
@@ -254,12 +266,12 @@
           <div class="flex items-center justify-between">
             <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Acurácia Histórica</span>
             <span class="p-2 rounded-xl bg-amber-500/10 text-amber-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </span>
           </div>
           <div class="mt-3 flex items-baseline gap-2">
             <span id="kpi-accuracy" class="text-3xl font-bold font-mono text-amber-400">--%</span>
-            <span id="kpi-accuracy-sub" class="text-xs text-slate-400">auditados</span>
+            <span id="kpi-accuracy-sub" class="text-xs text-slate-400">sem auditoria</span>
           </div>
         </div>
       </div>
@@ -267,14 +279,14 @@
       <!-- Filtros de Horizonte de Investimento -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/70 border border-slate-800 rounded-2xl p-4">
         <div>
-          <h2 class="text-base font-bold text-white">Sinais & Calendário Dinâmico por Horizonte</h2>
+          <h2 class="text-base font-bold text-white">Sinais &amp; Calendário Dinâmico por Horizonte</h2>
           <p class="text-xs text-slate-400">Clique em qualquer ativo abaixo para abrir o calendário de risco, ver o limite de compra/venda e registrar sua entrada.</p>
         </div>
         <div class="flex flex-wrap gap-2" id="horizon-filters">
-          <button onclick="setHorizonFilter('Todos')" data-horizon="Todos" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition">Todos</button>
-          <button onclick="setHorizonFilter('Diário')" data-horizon="Diário" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition">Diário (Curto Prazo)</button>
-          <button onclick="setHorizonFilter('Semanal')" data-horizon="Semanal" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition">Semanal (Swing)</button>
-          <button onclick="setHorizonFilter('Mensal')" data-horizon="Mensal" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition">Mensal (Posição/Macro)</button>
+          <button onclick="setHorizonFilter('Todos')" data-horizon="Todos" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-500 text-slate-950 transition shadow-md shadow-emerald-500/20">Todos</button>
+          <button onclick="setHorizonFilter('Diário')" data-horizon="Diário" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800/80 text-slate-300 hover:bg-slate-700 border border-slate-700/70 transition">Diário (Curto Prazo)</button>
+          <button onclick="setHorizonFilter('Semanal')" data-horizon="Semanal" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800/80 text-slate-300 hover:bg-slate-700 border border-slate-700/70 transition">Semanal (Swing)</button>
+          <button onclick="setHorizonFilter('Mensal')" data-horizon="Mensal" class="horizon-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800/80 text-slate-300 hover:bg-slate-700 border border-slate-700/70 transition">Mensal (Posição/Macro)</button>
         </div>
       </div>
 
@@ -291,18 +303,18 @@
               </span>
               <span id="cal-asset-badge" class="text-lg font-extrabold font-mono text-white">---</span>
               <span id="cal-horizon-badge" class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-semibold">---</span>
-              <span id="cal-today-status-pill" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border">---</span>
+              <span id="cal-today-status-pill" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-emerald-500/20 text-emerald-300 border-emerald-400/50">---</span>
             </div>
-            <p id="cal-news-title" class="text-xs text-slate-400 line-clamp-1">Selecione um ativo no radar abaixo.</p>
+            <p id="cal-news-title" class="text-xs text-slate-400 line-clamp-1">---</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
             <button id="btn-open-trade-from-cal" onclick="openSelectedTradeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-500 hover:bg-violet-400 text-white font-bold text-xs transition shadow-lg shadow-violet-500/20">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               <span id="btn-trade-label">Registrar Minha Compra</span>
             </button>
             <button onclick="openSelectedScheduleModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
               Ajustar Datas
             </button>
           </div>
@@ -316,11 +328,11 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <button onclick="shiftCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition" title="Mês anterior">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 <h3 id="cal-month-label" class="text-sm font-bold text-white capitalize min-w-[140px] text-center">---</h3>
                 <button onclick="shiftCalendarMonth(1)" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition" title="Próximo mês">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
                 </button>
               </div>
               <button onclick="jumpCalendarToToday()" class="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-[11px] font-semibold transition">
@@ -340,9 +352,7 @@
             </div>
 
             <!-- Grade de Dias -->
-            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5">
-              <!-- Renderizado via JS -->
-            </div>
+            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5"></div>
 
             <!-- Legenda de Cores de Risco Progressivo -->
             <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-slate-300">
@@ -380,7 +390,6 @@
 
           <!-- Coluna Direita: Resumo de Datas + Comparativo da Minha Compra -->
           <div class="lg:col-span-5 flex flex-col justify-between gap-4">
-            <!-- Cartões de Marcos de Data -->
             <div class="space-y-3">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-300">Limites Planejados pelo Modelo</div>
               <div class="grid grid-cols-2 gap-2.5 text-xs">
@@ -402,16 +411,10 @@
                 </div>
               </div>
 
-              <!-- Diagnóstico do Dia Atual -->
-              <div id="cal-today-diagnosis" class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-1">
-                <!-- Renderizado via JS -->
-              </div>
+              <div id="cal-today-diagnosis" class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-1"></div>
             </div>
 
-            <!-- Bloco de Comparativo: Minha Compra vs Indicação do Sistema -->
-            <div id="user-trade-comparison-box" class="p-4 rounded-2xl bg-slate-950/90 border border-violet-500/30 space-y-3">
-              <!-- Renderizado via JS -->
-            </div>
+            <div id="user-trade-comparison-box" class="p-4 rounded-2xl bg-slate-950/90 border border-violet-500/30 space-y-3"></div>
           </div>
         </div>
       </div>
@@ -419,12 +422,10 @@
       <!-- Grade de Cards de Sinais -->
       <div>
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300">Radar de Ativos & Mini-Calendário de Entrada</h3>
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300">Radar de Ativos &amp; Mini-Calendário de Entrada</h3>
           <span id="signals-count-label" class="text-xs font-mono text-slate-400">0 sinais exibidos</span>
         </div>
-        <div id="signals-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <!-- Renderizado via JS -->
-        </div>
+        <div id="signals-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
       </div>
 
       <!-- Gráficos Interativos (Chart.js) -->
@@ -433,9 +434,9 @@
           <div class="flex items-start justify-between gap-2 mb-4">
             <div>
               <h3 class="text-sm font-bold text-white">Curva de Decaimento do Impacto da Notícia</h3>
-              <p id="decay-chart-subtitle" class="text-xs text-slate-400 mt-0.5">Persistência estimada de influência ao longo do tempo</p>
+              <p id="decay-chart-subtitle" class="text-xs text-slate-400 mt-0.5">---</p>
             </div>
-            <span id="decay-badge" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-mono text-[11px] border border-emerald-500/20">Ativo</span>
+            <span id="decay-badge" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-mono text-[11px] border border-emerald-500/20">---</span>
           </div>
           <div class="relative h-60 w-full">
             <canvas id="decayChart"></canvas>
@@ -446,7 +447,7 @@
           <div class="flex items-start justify-between gap-2 mb-4">
             <div>
               <h3 class="text-sm font-bold text-white">Distribuição Probabilística de Cenários</h3>
-              <p id="scenario-chart-subtitle" class="text-xs text-slate-400 mt-0.5">Projeção ponderada: Otimista, Base e Pessimista (Perda)</p>
+              <p id="scenario-chart-subtitle" class="text-xs text-slate-400 mt-0.5">---</p>
             </div>
             <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-mono text-[11px] border border-slate-700">Monte Carlo / IA</span>
           </div>
@@ -458,9 +459,117 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- NOVA ABA: MERCADO, GOOGLE FINANÇAS, SCANNER & PROJEÇÃO FUTURA         -->
+    <!-- ABA NOVA: CARTEIRA CONSOLIDADA, P&L EM TEMPO REAL & POSITION SIZING   -->
     <!-- ===================================================================== -->
-    <section id="tab-market" class="tab-section hidden space-y-6 fade-in">
+    <section id="tab-portfolio" class="tab-section space-y-6 fade-in hidden">
+      <!-- KPIs da Carteira -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-panel border border-slate-800 rounded-2xl p-5">
+          <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Capital Alocado (Aberto)</span>
+          <div id="pf-kpi-invested" class="text-2xl sm:text-3xl font-bold font-mono text-white mt-2">R$ 0,00</div>
+          <div id="pf-kpi-open-count" class="text-xs text-slate-400 mt-1">0 posições em aberto</div>
+        </div>
+        <div class="glass-panel border border-slate-800 rounded-2xl p-5">
+          <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Valor Atual Estimado</span>
+          <div id="pf-kpi-current" class="text-2xl sm:text-3xl font-bold font-mono text-sky-300 mt-2">R$ 0,00</div>
+          <div class="text-xs text-slate-400 mt-1">marcados a mercado</div>
+        </div>
+        <div class="glass-panel border border-slate-800 rounded-2xl p-5">
+          <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Lucro / Prejuízo Total (P&amp;L)</span>
+          <div id="pf-kpi-pnl" class="text-2xl sm:text-3xl font-bold font-mono text-emerald-400 mt-2">R$ 0,00</div>
+          <div id="pf-kpi-pnl-pct" class="text-xs font-mono text-slate-400 mt-1">0.00% (aberto + realizado)</div>
+        </div>
+        <div class="glass-panel border border-slate-800 rounded-2xl p-5">
+          <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Exposição Média de Risco</span>
+          <div id="pf-kpi-risk" class="text-2xl sm:text-3xl font-bold font-mono text-amber-400 mt-2">--%</div>
+          <div id="pf-kpi-risk-label" class="text-xs text-slate-400 mt-1">probabilidade ponderada</div>
+        </div>
+      </div>
+
+      <!-- Grade: Calculadora de Position Sizing + Gráfico de Alocação -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Calculadora Profissional de Position Sizing & Stop Loss -->
+        <div class="lg:col-span-7 glass-panel border border-emerald-500/30 rounded-2xl p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">GESTÃO DE RISCO QUANTITATIVA</span>
+              <h2 class="text-base font-bold text-white mt-1">Calculadora de Position Sizing &amp; Stop Loss</h2>
+              <p class="text-xs text-slate-400">Calcule o tamanho ideal do aporte sem comprometer seu patrimônio.</p>
+            </div>
+            <button onclick="syncSizingWithSelectedAsset()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-300 border border-slate-700 transition">
+              Puxar Ativo do Scanner
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="space-y-1">
+              <label class="block text-[11px] font-medium text-slate-300">Banca Total (R$)</label>
+              <input id="ps-capital" type="number" step="100" value="25000" oninput="calculatePositionSizing()" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+            </div>
+            <div class="space-y-1">
+              <label class="block text-[11px] font-medium text-slate-300">Risco Máx/Trade (%)</label>
+              <input id="ps-risk-pct" type="number" step="0.25" value="1.5" oninput="calculatePositionSizing()" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+            </div>
+            <div class="space-y-1">
+              <label class="block text-[11px] font-medium text-slate-300">Preço Entrada (R$)</label>
+              <input id="ps-entry" type="number" step="0.01" value="37.90" oninput="calculatePositionSizing()" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+            </div>
+            <div class="space-y-1">
+              <label class="block text-[11px] font-medium text-slate-300">Stop Loss (R$)</label>
+              <input id="ps-stop" type="number" step="0.01" value="35.60" oninput="calculatePositionSizing()" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+            </div>
+          </div>
+
+          <div id="ps-result-box" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1"></div>
+        </div>
+
+        <!-- Gráfico de Alocação por Classe -->
+        <div class="lg:col-span-5 glass-panel border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white">Alocação por Classe de Ativo</h3>
+            <p class="text-xs text-slate-400">Distribuição entre Ações, FIIs, ETFs, Renda Fixa e Cripto.</p>
+          </div>
+          <div class="relative h-52 w-full my-2">
+            <canvas id="portfolioAllocChart"></canvas>
+          </div>
+          <div id="pf-concentration-warning" class="text-[11px] text-slate-400"></div>
+        </div>
+      </div>
+
+      <!-- Tabela Consolidada de Posições -->
+      <div class="glass-panel border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-white">Minhas Posições &amp; Acompanhamento de Janela</h3>
+            <p class="text-xs text-slate-400">Operações registradas nos calendários com cálculo automático de rentabilidade e status de saída.</p>
+          </div>
+          <button onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl bg-violet-500/15 hover:bg-violet-500/25 text-violet-300 border border-violet-500/30 text-xs font-semibold transition">
+            + Nova Compra pelo Calendário
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 bg-slate-950/60 text-[10px] uppercase tracking-wider text-slate-400">
+                <th class="py-3 px-4">Ativo / Horizonte</th>
+                <th class="py-3 px-3">Data &amp; Timing</th>
+                <th class="py-3 px-3 text-right">Aporte / Preço Ent.</th>
+                <th class="py-3 px-3 text-right">Cotação / Saída</th>
+                <th class="py-3 px-3 text-right">Resultado (P&amp;L)</th>
+                <th class="py-3 px-3 text-center">Status Janela</th>
+                <th class="py-3 px-4 text-right">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="portfolio-positions-tbody" class="divide-y divide-slate-800/70 text-xs"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 2: MERCADO, GOOGLE FINANÇAS, SCANNER & PROJEÇÃO FUTURA            -->
+    <!-- ===================================================================== -->
+    <section id="tab-market" class="tab-section space-y-6 fade-in hidden">
       <!-- Barra de Busca Ao Vivo no Google Finanças -->
       <div class="glass-panel border border-sky-500/30 rounded-2xl p-5 space-y-4 shadow-xl shadow-sky-950/15">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -471,17 +580,17 @@
               </span>
               <span class="text-[11px] text-slate-400">Ações B3 • FIIs • ETFs • BDRs • Fundos • Renda Fixa • Cripto</span>
             </div>
-            <h2 class="text-base sm:text-lg font-bold text-white mt-1">Scanner de Ativos, Histórico & Projeção Futura</h2>
+            <h2 class="text-base sm:text-lg font-bold text-white mt-1">Scanner de Ativos, Histórico &amp; Projeção Futura</h2>
             <p class="text-xs text-slate-400">Busque qualquer ativo no Google Finanças ao vivo ou utilize os filtros completos abaixo para descobrir oportunidades e gerar calendários.</p>
           </div>
 
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
             <div class="relative flex-1 sm:w-64">
               <input id="gf-live-ticker" type="text" onkeydown="if(event.key==='Enter') searchGoogleFinanceLive()" placeholder="Ex: PETR4, MXRF11, NVDA, IVVB11..." class="w-full bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl pl-3.5 pr-9 py-2.5 text-xs font-mono text-white placeholder-slate-500 outline-none uppercase" />
-              <svg class="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <svg class="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
             <button id="btn-gf-live-search" onclick="searchGoogleFinanceLive()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-sky-500/20 whitespace-nowrap">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
               <span id="btn-gf-live-text">Consultar Google Finanças</span>
             </button>
           </div>
@@ -503,13 +612,13 @@
 
           <select id="market-filter-sector" onchange="renderMarketAssetsList()" class="bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
             <option value="Todos">Setor: Todos</option>
-            <option value="Petróleo & Energia">Petróleo & Energia</option>
-            <option value="Bancos & Financeiro">Bancos & Financeiro</option>
-            <option value="Mineração & Indústria">Mineração & Indústria</option>
+            <option value="Petróleo &amp; Energia">Petróleo &amp; Energia</option>
+            <option value="Bancos &amp; Financeiro">Bancos &amp; Financeiro</option>
+            <option value="Mineração &amp; Indústria">Mineração &amp; Indústria</option>
             <option value="Imobiliário">Imobiliário (Tijolo/Papel)</option>
-            <option value="Tecnologia & IA">Tecnologia & IA</option>
-            <option value="Índices & Macro">Índices & Macro</option>
-            <option value="Soberano & Crédito">Soberano & Crédito</option>
+            <option value="Tecnologia &amp; IA">Tecnologia &amp; IA</option>
+            <option value="Índices &amp; Macro">Índices &amp; Macro</option>
+            <option value="Soberano &amp; Crédito">Soberano &amp; Crédito</option>
             <option value="Criptoativos">Criptoativos</option>
           </select>
 
@@ -523,9 +632,9 @@
 
           <select id="market-filter-dy" onchange="renderMarketAssetsList()" class="bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
             <option value="0">DY Mínimo: Qualquer</option>
-            <option value="4">DY &ge; 4% a.a.</option>
-            <option value="8">DY &ge; 8% a.a.</option>
-            <option value="10">DY &ge; 10% a.a.</option>
+            <option value="4">DY ≥ 4% a.a.</option>
+            <option value="8">DY ≥ 8% a.a.</option>
+            <option value="10">DY ≥ 10% a.a.</option>
           </select>
 
           <div class="flex gap-2">
@@ -542,65 +651,60 @@
         </div>
       </div>
 
-      <!-- Painel Principal do Ativo Selecionado: Fundamentos + Gráfico Histórico & Projeção Futura -->
+      <!-- Painel Principal do Ativo Selecionado -->
       <div id="selected-asset-analyzer" class="glass-panel border border-slate-800 rounded-2xl p-5 space-y-5">
-        <!-- Cabeçalho do Ativo -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div class="space-y-1">
             <div class="flex flex-wrap items-center gap-2">
-              <span id="ma-ticker" class="text-2xl font-extrabold font-mono text-white">PETR4</span>
-              <span id="ma-class-badge" class="px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10px] font-bold">Ação B3</span>
-              <span id="ma-sector-badge" class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-semibold">Petróleo & Energia</span>
-              <span id="ma-source-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono border bg-emerald-500/10 text-emerald-300 border-emerald-500/30">Radar Local</span>
+              <span id="ma-ticker" class="text-2xl font-extrabold font-mono text-white">---</span>
+              <span id="ma-class-badge" class="px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10px] font-bold">---</span>
+              <span id="ma-sector-badge" class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-semibold">---</span>
+              <span id="ma-source-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono border bg-slate-800 text-slate-300 border-slate-700">---</span>
             </div>
-            <p id="ma-name" class="text-xs text-slate-300">Petrobras PN • B3</p>
+            <p id="ma-name" class="text-xs text-slate-300">---</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
             <div class="text-left lg:text-right pr-2">
               <div class="flex items-center lg:justify-end gap-1.5">
-                <div id="ma-price" class="text-2xl font-extrabold font-mono text-white">R$ 38,45</div>
+                <div id="ma-price" class="text-2xl font-extrabold font-mono text-white">R$ 0.00</div>
                 <button onclick="openQuickPriceModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition" title="Ajustar preço atual manualmente">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </button>
               </div>
-              <div id="ma-changes" class="text-xs font-mono text-emerald-400">Hoje: +1,42% • 30d: +6,10%</div>
+              <div id="ma-changes" class="text-xs font-mono text-emerald-400"></div>
             </div>
-            <a id="ma-gf-link" href="https://www.google.com/finance/quote/PETR4:BVMF" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
+            <a id="ma-gf-link" href="https://www.google.com/finance" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
               Google Finanças ↗
             </a>
             <button onclick="refreshSelectedAssetLive()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-semibold transition">
               Atualizar Ao Vivo
             </button>
             <button onclick="sendSelectedAssetToDashboardSignal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20">
-              + Gerar Sinal & Calendário
+              + Gerar Sinal &amp; Calendário
             </button>
           </div>
         </div>
 
-        <!-- Grade de Fundamentos e Indicadores Técnicos -->
-        <div id="ma-metrics-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-          <!-- Renderizado via JS -->
-        </div>
+        <div id="ma-metrics-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5"></div>
 
-        <!-- Gráfico Histórico + Cone de Projeção Futura Probabilística -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
           <div class="lg:col-span-8 bg-slate-950/75 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="text-sm font-bold text-white">Histórico de Preços + Projeção Futura Probabilística</h3>
-                <p id="ma-chart-subtitle" class="text-[11px] text-slate-400">Linha sólida: histórico & SMA • Linhas tracejadas: cone Otimista / Base / Pessimista</p>
+                <p id="ma-chart-subtitle" class="text-[11px] text-slate-400">Linha sólida: histórico &amp; SMA • Linhas tracejadas: cone Otimista / Base / Pessimista</p>
               </div>
               <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-[10px] text-slate-400 mr-1">Histórico:</span>
-                <button onclick="setMarketHistoryRange('30D')" data-hrange="30D" class="hrange-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition">30D</button>
-                <button onclick="setMarketHistoryRange('90D')" data-hrange="90D" class="hrange-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition">90D</button>
-                <button onclick="setMarketHistoryRange('1A')" data-hrange="1A" class="hrange-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition">1A</button>
+                <button onclick="setMarketHistoryRange('30D')" data-hrange="30D" class="hrange-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">30D</button>
+                <button onclick="setMarketHistoryRange('90D')" data-hrange="90D" class="hrange-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold bg-sky-500 text-slate-950 transition">90D</button>
+                <button onclick="setMarketHistoryRange('1A')" data-hrange="1A" class="hrange-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">1A</button>
                 <span class="text-[10px] text-slate-500 mx-1">|</span>
                 <span class="text-[10px] text-slate-400 mr-1">Projeção:</span>
-                <button onclick="setMarketProjHorizon(15)" data-phorizon="15" class="phorizon-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition">+15D</button>
-                <button onclick="setMarketProjHorizon(30)" data-phorizon="30" class="phorizon-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition">+30D</button>
-                <button onclick="setMarketProjHorizon(90)" data-phorizon="90" class="phorizon-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition">+90D</button>
+                <button onclick="setMarketProjHorizon(15)" data-phorizon="15" class="phorizon-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">+15D</button>
+                <button onclick="setMarketProjHorizon(30)" data-phorizon="30" class="phorizon-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-500 text-slate-950 transition">+30D</button>
+                <button onclick="setMarketProjHorizon(90)" data-phorizon="90" class="phorizon-btn px-2 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">+90D</button>
               </div>
             </div>
             <div class="relative h-72 w-full">
@@ -608,14 +712,9 @@
             </div>
           </div>
 
-          <!-- Painel Lateral de Cenários Projetados & Notícias do Ativo -->
           <div class="lg:col-span-4 flex flex-col justify-between gap-3">
-            <div id="ma-projection-summary" class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800 space-y-3">
-              <!-- Renderizado via JS -->
-            </div>
-            <div id="ma-news-and-sources" class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800 space-y-2.5 flex-1">
-              <!-- Renderizado via JS -->
-            </div>
+            <div id="ma-projection-summary" class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800 space-y-3"></div>
+            <div id="ma-news-and-sources" class="p-4 rounded-2xl bg-slate-950/75 border border-slate-800 space-y-2.5 flex-1"></div>
           </div>
         </div>
       </div>
@@ -625,7 +724,7 @@
         <div class="lg:col-span-8 glass-panel border border-slate-800 rounded-2xl overflow-hidden">
           <div class="p-4 border-b border-slate-800 flex items-center justify-between">
             <div>
-              <h3 class="text-sm font-bold text-white">Ativos Monitorados (Ações, FIIs, ETFs, Fundos & Cripto)</h3>
+              <h3 class="text-sm font-bold text-white">Ativos Monitorados (Ações, FIIs, ETFs, Fundos &amp; Cripto)</h3>
               <p class="text-[11px] text-slate-400">Clique em uma linha para carregar o histórico, projeção futura e indicadores técnicos.</p>
             </div>
             <span id="market-count-badge" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-mono text-xs border border-slate-700">0 ativos</span>
@@ -643,25 +742,20 @@
                   <th class="py-3 px-4 text-right">Score</th>
                 </tr>
               </thead>
-              <tbody id="market-assets-tbody" class="divide-y divide-slate-800/70 text-xs">
-                <!-- Renderizado via JS -->
-              </tbody>
+              <tbody id="market-assets-tbody" class="divide-y divide-slate-800/70 text-xs"></tbody>
             </table>
           </div>
         </div>
 
-        <!-- Radar Econômico & Eventos de Alto Impacto -->
         <div class="lg:col-span-4 glass-panel border border-slate-800 rounded-2xl p-5 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-sm font-bold text-white">Agenda Macro & Eventos de Risco</h3>
+              <h3 class="text-sm font-bold text-white">Agenda Macro &amp; Eventos de Risco</h3>
               <p class="text-[11px] text-slate-400">Gatilhos que elevam volatilidade nas janelas de entrada/saída.</p>
             </div>
             <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold">VOLATILIDADE</span>
           </div>
-          <div id="economic-events-list" class="space-y-2.5">
-            <!-- Renderizado via JS -->
-          </div>
+          <div id="economic-events-list" class="space-y-2.5"></div>
           <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
             <strong class="text-emerald-400">Dica de Timing:</strong> Evite concentrar compras na véspera de decisões de juros (Copom/FOMC) se o seu perfil for Conservador; aguarde a confirmação do Dia 1 pós-evento.
           </div>
@@ -670,10 +764,9 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- ABA 2: CENTRAL DE NOTÍCIAS, COLETA AUTOMÁTICA & IMPORTADOR            -->
+    <!-- ABA 3: CENTRAL DE NOTÍCIAS, COLETA AUTOMÁTICA & IMPORTADOR            -->
     <!-- ===================================================================== -->
-    <section id="tab-news" class="tab-section hidden space-y-6 fade-in">
-      <!-- Painel de Coleta Automática de Notícias (Google Finanças & Portais Oficiais) -->
+    <section id="tab-news" class="tab-section space-y-6 fade-in hidden">
       <div class="glass-panel border border-emerald-500/30 rounded-2xl p-5 space-y-4">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div class="space-y-1">
@@ -681,22 +774,20 @@
               <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
                 COLETA AUTOMÁTICA EM TEMPO REAL
               </span>
-              <span id="auto-collect-status-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono border bg-slate-800 text-slate-300 border-slate-700">
-                Modo Manual
-              </span>
+              <span id="auto-collect-status-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono border bg-slate-800 text-slate-300 border-slate-700">Modo Manual</span>
             </div>
-            <h2 class="text-base font-bold text-white">Coletor Automático: Google Finanças, Banco Central, CVM & Portais Tier-1</h2>
+            <h2 class="text-base font-bold text-white">Coletor Automático: Google Finanças, Banco Central, CVM &amp; Portais Tier-1</h2>
             <p class="text-xs text-slate-400">
-              Funciona via <strong class="text-sky-300">Google Search Grounding (IA ao vivo)</strong> sem bloqueio de CORS, trazendo manchetes reais, citações verificadas e agendamento automático.
+              Funciona via <strong class="text-sky-300">Google Search Grounding (IA ao vivo) + RSS Finanças</strong> sem bloqueio de CORS, trazendo manchetes reais e agendamento automático.
             </p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
             <select id="auto-collect-topic" onchange="saveAutoCollectConfig()" class="bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
-              <option value="Mercado Financeiro Brasil, B3, Google Finanças e Ibovespa">Foco: B3 & Google Finanças</option>
-              <option value="Fundos Imobiliários FIIs, dividendos e IFIX Brasil">Foco: FIIs & Dividendos</option>
-              <option value="Copom, Banco Central, Selic, IPCA e Federal Reserve juros">Foco: Macro, Copom & Fed</option>
-              <option value="Ações EUA S&P 500 Nasdaq Tecnologia IA e Bitcoin ETFs">Foco: EUA, Tech & Cripto</option>
+              <option value="Mercado Financeiro Brasil, B3, Google Finanças e Ibovespa">Foco: B3 &amp; Google Finanças</option>
+              <option value="Fundos Imobiliários FIIs, dividendos e IFIX Brasil">Foco: FIIs &amp; Dividendos</option>
+              <option value="Copom, Banco Central, Selic, IPCA e Federal Reserve juros">Foco: Macro, Copom &amp; Fed</option>
+              <option value="Ações EUA S&amp;P 500 Nasdaq Tecnologia IA e Bitcoin ETFs">Foco: EUA, Tech &amp; Cripto</option>
             </select>
 
             <select id="auto-collect-interval" onchange="updateAutoCollectSchedule()" class="bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
@@ -707,38 +798,13 @@
             </select>
 
             <button id="btn-auto-collect-now" onclick="collectRealTimeNews(false)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
               <span id="btn-collect-now-text">Coletar Notícias Agora</span>
             </button>
 
             <button onclick="collectRealTimeNews(true)" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 font-semibold text-xs transition" title="Coleta notícias reais e já gera sinais e calendário automaticamente para a principal manchete">
               Coletar + Analisar Top 1
             </button>
-          </div>
-        </div>
-
-        <!-- Explicação visual do Pipeline de Coleta -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-[11px]">
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5">
-            <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 font-mono font-bold">1</span>
-            <div>
-              <div class="font-bold text-slate-200">Busca Ao Vivo (Google Grounding)</div>
-              <p class="text-slate-400 mt-0.5">Consulta Google Finanças, CVM, BCB, Valor, InfoMoney e Reuters em tempo real sem erro de CORS.</p>
-            </div>
-          </div>
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5">
-            <span class="px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-400 font-mono font-bold">2</span>
-            <div>
-              <div class="font-bold text-slate-200">Classificação & Credibilidade</div>
-              <p class="text-slate-400 mt-0.5">Filtra duplicadas, atribui peso (Oficial 95%, Tier-1 85%, Rumor 35%) e anexa links verificados.</p>
-            </div>
-          </div>
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5">
-            <span class="px-2 py-0.5 rounded-md bg-violet-500/15 text-violet-400 font-mono font-bold">3</span>
-            <div>
-              <div class="font-bold text-slate-200">Fallback & Importação Manual</div>
-              <p class="text-slate-400 mt-0.5">Se estiver offline, mantém importador manual, extrator de URL e lote JSON com salvamento no navegador.</p>
-            </div>
           </div>
         </div>
       </div>
@@ -748,11 +814,11 @@
         <div class="lg:col-span-5 glass-panel border border-slate-800 rounded-2xl p-5 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-base font-bold text-white">Importar & Analisar Notícia</h2>
+              <h2 class="text-base font-bold text-white">Importar &amp; Analisar Notícia</h2>
               <p class="text-xs text-slate-400">Insira via URL ou cole o conteúdo de canais oficiais e portais.</p>
             </div>
             <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition border border-slate-700">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
               Lote JSON
               <input type="file" id="batch-json-input" accept=".json" class="hidden" onchange="handleImportJSON(event)" />
             </label>
@@ -798,37 +864,30 @@
           </div>
 
           <button id="btn-analyze-ai" onclick="submitNewsForAnalysis()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-            <svg id="analyze-icon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            <span id="analyze-btn-text">Analisar Notícia com IA & Gerar Calendário</span>
+            <svg id="analyze-icon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span id="analyze-btn-text">Analisar Notícia com IA &amp; Gerar Calendário</span>
           </button>
-
-          <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-            <span>Motor: <strong class="text-emerald-400 font-mono">Gemini + Heurística</strong></span>
-            <span>Salvamento automático no navegador</span>
-          </div>
         </div>
 
         <!-- Feed de Canais Oficiais e Bem Avaliados -->
         <div class="lg:col-span-7 glass-panel border border-slate-800 rounded-2xl p-5 flex flex-col">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
-              <h2 class="text-base font-bold text-white">Feed de Canais Oficiais & Fontes Tier-1</h2>
+              <h2 class="text-base font-bold text-white">Feed de Canais Oficiais &amp; Fontes Tier-1</h2>
               <p class="text-xs text-slate-400">Notícias monitoradas com selo de credibilidade. Clique em analisar para criar novos sinais e calendários.</p>
             </div>
             <span id="feed-count-badge" class="self-start sm:self-auto px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-mono text-xs border border-slate-700">0 notícias</span>
           </div>
 
-          <div id="news-feed-list" class="space-y-3 overflow-y-auto max-h-[640px] pr-1">
-            <!-- Renderizado via JS -->
-          </div>
+          <div id="news-feed-list" class="space-y-3 overflow-y-auto max-h-[640px] pr-1"></div>
         </div>
       </div>
     </section>
 
     <!-- ===================================================================== -->
-    <!-- ABA 3: MÉTRICAS DE INFLUÊNCIA & CALIBRAÇÃO DO MODELO                  -->
+    <!-- ABA 4: MÉTRICAS DE INFLUÊNCIA & CALIBRAÇÃO DO MODELO                  -->
     <!-- ===================================================================== -->
-    <section id="tab-calibration" class="tab-section hidden space-y-6 fade-in">
+    <section id="tab-calibration" class="tab-section space-y-6 fade-in hidden">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-7 glass-panel border border-slate-800 rounded-2xl p-6 space-y-6">
           <div class="flex items-center justify-between">
@@ -878,15 +937,15 @@
           <div class="space-y-2.5">
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Perfil de Tolerância ao Risco</label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="risk-profile-group">
-              <button onclick="setRiskProfile('Conservador')" data-profile="Conservador" class="profile-btn p-3.5 rounded-xl border text-left transition">
+              <button onclick="setRiskProfile('Conservador')" data-profile="Conservador" class="profile-btn p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition">
                 <div class="font-bold text-sm text-white">Conservador</div>
                 <div class="text-[11px] text-slate-400 mt-1">Penaliza volatilidade (+15% cautela no risco de perda).</div>
               </button>
-              <button onclick="setRiskProfile('Moderado')" data-profile="Moderado" class="profile-btn p-3.5 rounded-xl border text-left transition">
+              <button onclick="setRiskProfile('Moderado')" data-profile="Moderado" class="profile-btn p-3.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-left transition">
                 <div class="font-bold text-sm text-white">Moderado</div>
                 <div class="text-[11px] text-slate-400 mt-1">Equilíbrio entre assimetria de ganho e proteção.</div>
               </button>
-              <button onclick="setRiskProfile('Agressivo')" data-profile="Agressivo" class="profile-btn p-3.5 rounded-xl border text-left transition">
+              <button onclick="setRiskProfile('Agressivo')" data-profile="Agressivo" class="profile-btn p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition">
                 <div class="font-bold text-sm text-white">Agressivo</div>
                 <div class="text-[11px] text-slate-400 mt-1">Maior apetite para swing/especulação (-12% filtro).</div>
               </button>
@@ -895,7 +954,7 @@
 
           <div class="pt-2 flex flex-wrap gap-3">
             <button onclick="saveAndApplyCalibration()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow-lg shadow-emerald-500/20">
-              Salvar no Navegador & Recalcular Sinais
+              Salvar &amp; Recalcular Sinais
             </button>
           </div>
         </div>
@@ -903,40 +962,18 @@
         <div class="lg:col-span-5 space-y-6">
           <div class="glass-panel border border-slate-800 rounded-2xl p-6 space-y-4">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
               Fórmulas Transparentes do Modelo
             </h3>
 
             <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs space-y-3">
               <div>
                 <div class="text-slate-400 text-[10px] uppercase mb-1">1. Índice de Influência da Notícia (IIN)</div>
-                <div class="text-emerald-400 leading-relaxed" id="formula-iin-display">
-                  IIN = (0.35 × Cred) + (0.35 × |Sent|) + (0.30 × Macro)
-                </div>
+                <div class="text-emerald-400 leading-relaxed" id="formula-iin-display">IIN = (0.35 × Cred) + (0.35 × |Sent|) + (0.30 × Macro)</div>
               </div>
               <div class="border-t border-slate-800 pt-3">
                 <div class="text-slate-400 text-[10px] uppercase mb-1">2. Probabilidade Ajustada de Perda (PAP)</div>
-                <div class="text-amber-400 leading-relaxed" id="formula-pap-display">
-                  PAP = Clamp(ProbBase × FatorPerfil × (1.35 - IIN/200), 5%, 92%)
-                </div>
-              </div>
-            </div>
-
-            <div class="space-y-2 text-xs text-slate-300">
-              <div class="font-semibold text-white">Tabela de Credibilidade das Fontes:</div>
-              <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 flex justify-between">
-                  <span class="text-emerald-400">Oficial/Regulador</span><span>95 pts</span>
-                </div>
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 flex justify-between">
-                  <span class="text-sky-400">Mídia Tier-1</span><span>85 pts</span>
-                </div>
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 flex justify-between">
-                  <span class="text-amber-400">Portal Geral</span><span>65 pts</span>
-                </div>
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 flex justify-between">
-                  <span class="text-rose-400">Rumor/Espec.</span><span>35 pts</span>
-                </div>
+                <div class="text-amber-400 leading-relaxed" id="formula-pap-display">PAP = Clamp(ProbBase × 1.00 × (1.35 - IIN/200), 5%, 92%)</div>
               </div>
             </div>
           </div>
@@ -947,7 +984,7 @@
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <div class="text-[11px] text-slate-400">IIN Calculado</div>
-                <div id="sim-iin" class="text-2xl font-bold font-mono text-emerald-400 mt-1">81.1</div>
+                <div id="sim-iin" class="text-2xl font-bold font-mono text-emerald-400 mt-1">81.0</div>
               </div>
               <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <div class="text-[11px] text-slate-400">Prob. Perda Ajustada</div>
@@ -960,26 +997,22 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- ABA 4: HISTÓRICO, MINHAS COMPRAS & FEEDBACK COMPARATIVO               -->
+    <!-- ABA 5: HISTÓRICO, MINHAS COMPRAS & FEEDBACK COMPARATIVO               -->
     <!-- ===================================================================== -->
-    <section id="tab-history" class="tab-section hidden space-y-6 fade-in">
-      <!-- Cabeçalho e Ações de Banco Local -->
+    <section id="tab-history" class="tab-section space-y-6 fade-in hidden">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel border border-slate-800 rounded-2xl p-5">
         <div>
-          <h2 class="text-base font-bold text-white">Banco de Dados Local, Minhas Compras & Auditoria</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Tudo fica salvo automaticamente no seu navegador. Exporte em CSV ou JSON para backup ou estudos.</p>
+          <h2 class="text-base font-bold text-white">Banco de Dados Local / Supabase, Minhas Compras &amp; Auditoria</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Sincronize com o Supabase ou exporte em CSV/JSON para backup e análise comparativa.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-semibold transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Exportar CSV
           </button>
           <button onclick="exportJSON()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 text-xs font-semibold transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
             Exportar JSON
           </button>
           <label class="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Importar JSON
             <input type="file" accept=".json" class="hidden" onchange="handleImportJSON(event)" />
           </label>
@@ -989,7 +1022,6 @@
         </div>
       </div>
 
-      <!-- Painel Comparativo: Desempenho das Minhas Compras (Zona Verde vs Fora da Zona Verde) -->
       <div class="glass-panel border border-violet-500/30 rounded-2xl p-5 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -1001,12 +1033,9 @@
           </div>
           <span id="trades-summary-badge" class="px-2.5 py-1 rounded-lg bg-violet-500/15 text-violet-300 font-mono text-xs border border-violet-500/30">0 operações registradas</span>
         </div>
-        <div id="user-trades-comparative-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <!-- Renderizado via JS -->
-        </div>
+        <div id="user-trades-comparative-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
       </div>
 
-      <!-- Painel de Desempenho Comparativo (Por Horizonte e Por Fonte) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="glass-panel border border-slate-800 rounded-2xl p-5 space-y-4">
           <h3 class="text-sm font-bold text-white">Taxa de Acerto por Horizonte</h3>
@@ -1018,7 +1047,6 @@
         </div>
       </div>
 
-      <!-- Filtros do Histórico -->
       <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <input id="history-search" type="text" oninput="renderHistoryTable()" placeholder="Buscar por ativo, título da notícia ou fonte..." class="flex-1 bg-slate-900 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 outline-none" />
         <select id="history-status-filter" onchange="renderHistoryTable()" class="bg-slate-900 border border-slate-800 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none">
@@ -1031,23 +1059,20 @@
         </select>
       </div>
 
-      <!-- Tabela de Histórico -->
       <div class="glass-panel border border-slate-800 rounded-2xl overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-800 bg-slate-950/60 text-[11px] uppercase tracking-wider text-slate-400">
                 <th class="py-3.5 px-4">Data / Notícia</th>
-                <th class="py-3.5 px-4">Ativo & Sinal</th>
+                <th class="py-3.5 px-4">Ativo &amp; Sinal</th>
                 <th class="py-3.5 px-4">Janela Calendário</th>
-                <th class="py-3.5 px-4">Minha Compra & Comparativo</th>
+                <th class="py-3.5 px-4">Minha Compra &amp; Comparativo</th>
                 <th class="py-3.5 px-4">Resultado Real</th>
                 <th class="py-3.5 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="history-table-body" class="divide-y divide-slate-800/70 text-xs">
-              <!-- Renderizado via JS -->
-            </tbody>
+            <tbody id="history-table-body" class="divide-y divide-slate-800/70 text-xs"></tbody>
           </table>
         </div>
       </div>
@@ -1060,7 +1085,7 @@
       <div class="flex items-center gap-2">
         <span class="font-bold text-slate-300">PulseQuant</span>
         <span>•</span>
-        <span id="footer-storage-info" class="font-mono">Armazenamento Local (Browser)</span>
+        <span id="footer-storage-info" class="font-mono">Armazenamento Local</span>
       </div>
       <p class="text-center sm:text-right max-w-2xl leading-relaxed">
         Aviso: Esta plataforma é uma ferramenta de uso pessoal destinada à coleta de informações, estudos probabilísticos de notícias e avaliação comparativa de timing de mercado. Não constitui recomendação financeira oficial.
@@ -1069,271 +1094,124 @@
   </footer>
 
   <!-- ======================================================================= -->
-  <!-- MODAL 1: REGISTRAR / EDITAR MINHA COMPRA & COMPARATIVO                  -->
+  <!-- MODAL 8: CONEXÃO SUPABASE, AUTENTICAÇÃO & DEPLOY GITHUB PAGES           -->
   <!-- ======================================================================= -->
-  <div id="trade-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#0f1623] border border-violet-500/40 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl fade-in max-h-[90vh] overflow-y-auto">
+  <div id="cloud-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-sky-500/40 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl fade-in max-h-[90vh] overflow-y-auto">
       <div class="flex items-start justify-between">
         <div>
-          <span class="inline-block px-2 py-0.5 rounded-md bg-violet-500/15 text-violet-300 border border-violet-500/30 text-[10px] font-mono font-bold mb-1">
-            MINHA OPERAÇÃO & COMPARATIVO
+          <span class="inline-block px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10px] font-mono font-bold mb-1">
+            HOSPEDAGEM GITHUB PAGES + BANCO &amp; AUTH SUPABASE
           </span>
-          <h3 class="text-base font-bold text-white">Indicar Quando Comprei</h3>
-          <p id="trade-modal-subtitle" class="text-xs text-slate-400 mt-0.5">Compare sua data de entrada com a janela verde do sistema</p>
+          <h3 class="text-base font-bold text-white">Sincronização em Nuvem (Supabase) &amp; Conta Pessoal</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Conecte seu projeto Supabase para sincronizar entre computador e celular via Workspace ID ou Login com E-mail/Senha.</p>
         </div>
-        <button onclick="closeTradeModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+        <button onclick="closeCloudModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
       </div>
-
-      <input type="hidden" id="trade-analysis-id" />
-      <input type="hidden" id="trade-rec-index" />
-
-      <!-- Prévia instantânea do comparativo da data escolhida -->
-      <div id="trade-timing-preview" class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs"></div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-slate-300">Data da Compra *</label>
-          <input id="trade-buy-date" type="date" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-slate-300">Preço de Compra (R$ / US$)</label>
-          <input id="trade-buy-price" type="number" step="0.01" placeholder="Ex: 38.50" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-slate-300">Valor Investido (opc.)</label>
-          <input id="trade-amount" type="number" step="0.01" placeholder="Ex: 1000" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-slate-300">Data da Venda (se vendeu)</label>
-          <input id="trade-sell-date" type="date" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-slate-300">Preço de Venda (opc.)</label>
-          <input id="trade-sell-price" type="number" step="0.01" placeholder="Ex: 41.20" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="block text-xs font-medium text-slate-300">Notas da Operação</label>
-        <textarea id="trade-notes" rows="2" placeholder="Ex: Comprei na abertura após confirmação de volume..." class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"></textarea>
-      </div>
-
-      <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
-        <input id="trade-sync-feedback" type="checkbox" checked class="rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500" />
-        <span>Se preencher preço de compra e venda, atualizar também o Resultado Real (%) na auditoria</span>
-      </label>
-
-      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
-        <button id="btn-delete-trade" type="button" onclick="deleteUserTrade()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition">
-          Remover Compra
-        </button>
-        <div class="flex gap-2 ml-auto">
-          <button type="button" onclick="closeTradeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
-          <button type="button" onclick="saveTradeModal()" class="px-4 py-2 rounded-xl bg-violet-500 hover:bg-violet-400 text-xs font-bold text-white transition">Salvar no Navegador</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================= -->
-  <!-- MODAL 2: AJUSTAR DATAS DO CALENDÁRIO DO ATIVO                           -->
-  <!-- ======================================================================= -->
-  <div id="schedule-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#0f1623] border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-in">
-      <div class="flex items-start justify-between">
-        <div>
-          <h3 class="text-base font-bold text-white">Ajustar Datas do Calendário</h3>
-          <p id="schedule-modal-subtitle" class="text-xs text-slate-400 mt-0.5">Personalize as datas limite de compra e venda</p>
-        </div>
-        <button onclick="closeScheduleModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <input type="hidden" id="sched-analysis-id" />
-      <input type="hidden" id="sched-rec-index" />
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-emerald-300">Dia 1 (Início Entrada)</label>
-          <input id="sched-buy-start" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-emerald-300">Dia Final Entrada (Verde)</label>
-          <input id="sched-buy-end" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-amber-300">Alvo de Venda / Saque</label>
-          <input id="sched-sell-target" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-rose-300">Limite Máximo de Venda</label>
-          <input id="sched-sell-limit" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeScheduleModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
-        <button onclick="saveScheduleModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-bold text-slate-950 transition">Atualizar Calendário</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================= -->
-  <!-- MODAL 3: REGISTRO DE FEEDBACK COMPARATIVO                               -->
-  <!-- ======================================================================= -->
-  <div id="feedback-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#0f1623] border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl fade-in">
-      <div class="flex items-start justify-between">
-        <div>
-          <h3 class="text-base font-bold text-white">Registrar Feedback Comparativo</h3>
-          <p id="modal-feedback-subtitle" class="text-xs text-slate-400 mt-0.5">Auditoria do resultado real de mercado</p>
-        </div>
-        <button onclick="closeFeedbackModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <input type="hidden" id="modal-analysis-id" />
-      <input type="hidden" id="modal-rec-index" />
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-slate-300">Status da Previsão</label>
-          <select id="modal-status" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
-            <option value="Pendente">Pendente</option>
-            <option value="Acertou">Acertou (Direção & Prazo)</option>
-            <option value="Parcial">Parcial (Direção correta, magnitude divergente)</option>
-            <option value="Errou">Errou (Mercado foi contra)</option>
-          </select>
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-medium text-slate-300">Variação Real Observada (%)</label>
-          <input id="modal-actual-return" type="number" step="0.01" placeholder="Ex: +4.25 ou -1.80" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-        </div>
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="block text-xs font-medium text-slate-300">Anotações de Feedback / Lições Aprendidas</label>
-        <textarea id="modal-notes" rows="3" placeholder="Ex: O movimento aconteceu 2 dias antes do previsto devido à abertura do dólar..." class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"></textarea>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeFeedbackModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
-        <button onclick="saveFeedbackModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-bold text-slate-950 transition">Salvar Auditoria</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================= -->
-  <!-- MODAL 4: DETALHES DA ANÁLISE                                            -->
-  <!-- ======================================================================= -->
-  <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#0f1623] border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto fade-in">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <span id="detail-badge" class="inline-block px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-semibold mb-1.5"></span>
-          <h3 id="detail-title" class="text-base font-bold text-white"></h3>
-          <p id="detail-meta" class="text-xs text-slate-400 mt-1"></p>
-        </div>
-        <button onclick="closeDetailModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-      <div id="detail-body" class="space-y-4 text-xs text-slate-300 leading-relaxed"></div>
-    </div>
-  </div>
-
-  <!-- ======================================================================= -->
-  <!-- MODAL 5: CONFIRMAÇÃO PARA RESETAR DADOS DO NAVEGADOR                    -->
-  <!-- ======================================================================= -->
-  <div id="reset-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#0f1623] border border-rose-500/40 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-in">
-      <h3 class="text-base font-bold text-white">Restaurar Dados Locais do Navegador?</h3>
-      <p class="text-xs text-slate-300 leading-relaxed">
-        Isso limpará as análises, compras registradas e feedbacks salvos no <code class="text-amber-300">localStorage</code> e restaurará os dados de demonstração. Recomendamos exportar um backup em JSON antes.
-      </p>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
-        <button onclick="confirmResetLocalStorage()" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-xs font-bold text-white transition">Sim, Resetar Tudo</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================= -->
-  <!-- MODAL 6: AJUSTAR PREÇO ATUAL DO ATIVO MANUALMENTE                       -->
-  <!-- ======================================================================= -->
-  <div id="price-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#0f1623] border border-sky-500/40 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl fade-in">
-      <div class="flex items-start justify-between">
-        <div>
-          <h3 class="text-base font-bold text-white">Ajustar Cotação Atual</h3>
-          <p id="price-modal-subtitle" class="text-xs text-slate-400 mt-0.5">Recalcula suporte, resistência e projeção futura</p>
-        </div>
-        <button onclick="closeQuickPriceModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
-      </div>
-      <div class="space-y-3">
         <div class="space-y-1">
-          <label class="block text-xs font-medium text-slate-300">Preço Atual (R$ / US$)</label>
-          <input id="quick-price-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-sm font-mono text-white outline-none" />
+          <label class="block text-xs font-medium text-slate-300">Project URL (Supabase)</label>
+          <input id="sb-url-input" type="url" placeholder="https://seu-projeto.supabase.co" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
         </div>
-        <div class="grid grid-cols-2 gap-2.5">
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-slate-300">Variação Hoje (%)</label>
-            <input id="quick-day-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-          </div>
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-slate-300">Dividend Yield (%)</label>
-            <input id="quick-dy-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
-          </div>
+        <div class="space-y-1">
+          <label class="block text-xs font-medium text-slate-300">Workspace / Perfil ID (sua chave de pasta)</label>
+          <input id="sb-workspace-input" type="text" placeholder="Ex: minha-carteira-principal" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
         </div>
       </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeQuickPriceModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
-        <button onclick="saveQuickPriceModal()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-xs font-bold text-slate-950 transition">Aplicar Cotação</button>
+
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-slate-300">Anon / Public Key (Supabase API Settings)</label>
+        <input id="sb-key-input" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+      </div>
+
+      <!-- Seção Opcional: Login com E-mail e Senha (Supabase Auth) -->
+      <div class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-violet-300">Autenticação Pessoal (Supabase Auth — Opcional)</span>
+          <span id="sb-auth-user-badge" class="text-[11px] font-mono text-slate-400">Modo Workspace (sem login)</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input id="sb-auth-email" type="email" placeholder="seu@email.com" class="bg-slate-900 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs text-white outline-none" />
+          <input id="sb-auth-pass" type="password" placeholder="Senha (mín. 6 caracteres)" class="bg-slate-900 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs text-white outline-none" />
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="signInSupabaseUser()" class="px-3 py-1.5 rounded-lg bg-violet-500 hover:bg-violet-400 text-white font-semibold text-xs transition">Entrar</button>
+          <button onclick="signUpSupabaseUser()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition">Criar Conta</button>
+          <button id="btn-sb-signout" onclick="signOutSupabaseUser()" class="hidden px-3 py-1.5 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/30 font-semibold text-xs transition">Sair da Conta</button>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 pt-1">
+        <button onclick="saveSupabaseConfigAndSync()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
+          Conectar &amp; Sincronizar Agora
+        </button>
+        <button onclick="pushStateToSupabase(true)" class="px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 font-semibold text-xs transition">
+          Enviar Local → Nuvem
+        </button>
+        <button onclick="pullStateFromSupabase(true)" class="px-3 py-2 rounded-xl bg-violet-500/15 hover:bg-violet-500/25 text-violet-300 border border-violet-500/30 font-semibold text-xs transition">
+          Baixar Nuvem → Local
+        </button>
+        <button onclick="disconnectSupabase()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition ml-auto">
+          Desconectar
+        </button>
+      </div>
+
+      <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-emerald-400">Passo 1: Cole este SQL no "SQL Editor" do Supabase e clique em Run</span>
+          <button onclick="copySupabaseSql()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-mono text-slate-200 border border-slate-700 transition">
+            Copiar SQL
+          </button>
+        </div>
+        <pre id="supabase-sql-snippet" class="text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed bg-[#070a12] p-3 rounded-lg border border-slate-800/80">create table if not exists public.pulsequant_workspaces (
+  workspace_id text primary key,
+  payload jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.pulsequant_workspaces enable row level security;
+
+create policy "Acesso por workspace_id"
+  on public.pulsequant_workspaces
+  for all
+  to anon, authenticated
+  using (true)
+  with check (true);</pre>
+      </div>
+
+      <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5 text-xs text-slate-300">
+        <div class="font-bold text-sky-300">Passo 2: Publicar Online Grátis no GitHub Pages</div>
+        <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-400">
+          <li>Crie um repositório no GitHub (ex: <code class="text-slate-200">pulsequant-terminal</code>) e envie este arquivo renomeado para <code class="text-emerald-300">index.html</code>.</li>
+          <li>No repositório, acesse <strong class="text-slate-200">Settings → Pages</strong>, selecione a branch <code class="text-slate-200">main</code> e pasta <code class="text-slate-200">/ (root)</code> e salve.</li>
+          <li>Abra o link <code class="text-sky-300">https://seu-usuario.github.io/pulsequant-terminal/</code> e informe a URL + Anon Key do Supabase acima.</li>
+        </ol>
       </div>
     </div>
   </div>
 
   <!-- ======================================================================= -->
-  <!-- MODAL 7: CONFIGURAR CHAVE API GEMINI (USO LOCAL / LIVE SERVER)          -->
+  <!-- MODAL 9: CENTRAL DE ALERTAS INTELIGENTES                                -->
   <!-- ======================================================================= -->
-  <div id="apikey-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-[#0f1623] border border-emerald-500/40 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-in">
+  <div id="alerts-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-amber-500/40 rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl fade-in max-h-[85vh] overflow-y-auto">
       <div class="flex items-start justify-between">
         <div>
-          <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold mb-1">
-            MOTOR IA & GOOGLE SEARCH AO VIVO
+          <span class="inline-block px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold mb-1">
+            RADAR DE TIMING &amp; EXECUÇÃO
           </span>
-          <h3 class="text-base font-bold text-white">Configurar Chave API do Google Gemini</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Opcional para uso local (Live Server). Sem chave, o sistema usa cotações diretas (Brapi/BCB/Câmbio) e heurística local.</p>
+          <h3 class="text-base font-bold text-white">Central de Alertas Inteligentes</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Monitoramento automático das janelas verdes, prazos de venda e eventos macro.</p>
         </div>
-        <button onclick="closeApiKeyModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+        <button onclick="closeAlertsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
       </div>
-      <div class="space-y-2">
-        <label class="block text-xs font-medium text-slate-300">Gemini API Key (salva apenas no seu navegador)</label>
-        <input id="gemini-apikey-input" type="password" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2.5 text-xs font-mono text-white outline-none" />
-        <p class="text-[11px] text-slate-400">
-          Você pode gerar uma chave gratuita no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Google AI Studio</a>.
-        </p>
-      </div>
-      <div class="flex items-center justify-between gap-2 pt-2">
-        <button onclick="clearGeminiApiKey()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition">Limpar Chave</button>
-        <div class="flex gap-2">
-          <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
-          <button onclick="saveGeminiApiKey()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-bold text-slate-950 transition">Salvar Chave</button>
-        </div>
-      </div>
+      <div id="alerts-modal-list" class="space-y-2.5"></div>
     </div>
   </div>
 
   <!-- ======================================================================= -->
-  <!-- LÓGICA PRINCIPAL: CALENDÁRIO DINÂMICO, LOCALSTORAGE, IA & CHART.JS      -->
+  <!-- LÓGICA PRINCIPAL: CALENDÁRIO DINÂMICO, LOCALSTORAGE, SUPABASE & IA      -->
   <!-- ======================================================================= -->
   <script>
     // =========================================================================
@@ -1341,6 +1219,11 @@
     // =========================================================================
     const STORAGE_KEY = 'pulsequant_terminal_state_v2';
     const API_KEY_STORAGE = 'pulsequant_gemini_apikey_v1';
+    const SUPABASE_CFG_STORAGE = 'pulsequant_supabase_cfg_v1';
+
+    let supabaseClient = null;
+    let supabaseUser = null;
+    let cloudSyncDebounceTimer = null;
 
     const CREDIBILITY_MAP = {
       official: { label: 'Oficial / Regulador', score: 95, color: 'emerald' },
@@ -1358,6 +1241,7 @@
     let decayChartInstance = null;
     let scenarioChartInstance = null;
     let assetProjectionChartInstance = null;
+    let portfolioAllocChartInstance = null;
     let autoCollectTimerId = null;
 
     const nowDateObj = new Date();
@@ -1466,6 +1350,65 @@
     }
 
     // =========================================================================
+    // 2B. GESTÃO DE CHAVE API GEMINI (USO ONLINE / LOCAL)
+    // =========================================================================
+    function getStoredGeminiApiKey() {
+      try {
+        return (localStorage.getItem(API_KEY_STORAGE) || '').trim();
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function updateApiKeyIndicator() {
+      const key = getStoredGeminiApiKey();
+      const dot = document.getElementById('api-key-dot');
+      const label = document.getElementById('api-key-label');
+      if (dot) {
+        dot.className = key
+          ? 'w-2 h-2 rounded-full bg-emerald-400'
+          : 'w-2 h-2 rounded-full bg-amber-400';
+      }
+      if (label) {
+        label.textContent = key ? 'IA Ativa' : 'API IA';
+      }
+    }
+
+    window.openApiKeyModal = function () {
+      const input = document.getElementById('gemini-apikey-input');
+      if (input) input.value = getStoredGeminiApiKey();
+      const modal = document.getElementById('apikey-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeApiKeyModal = function () {
+      const modal = document.getElementById('apikey-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.saveGeminiApiKey = function () {
+      const val = (document.getElementById('gemini-apikey-input')?.value || '').trim();
+      try {
+        if (val) localStorage.setItem(API_KEY_STORAGE, val);
+        else localStorage.removeItem(API_KEY_STORAGE);
+      } catch (_) {}
+      updateApiKeyIndicator();
+      closeApiKeyModal();
+      showToast(val ? 'Chave API Gemini salva no navegador!' : 'Chave API removida.', 'success');
+    };
+
+    window.clearGeminiApiKey = function () {
+      try { localStorage.removeItem(API_KEY_STORAGE); } catch (_) {}
+      const input = document.getElementById('gemini-apikey-input');
+      if (input) input.value = '';
+      updateApiKeyIndicator();
+      closeApiKeyModal();
+      showToast('Chave API removida do navegador.', 'info');
+    };
+
+    // =========================================================================
     // 3. CALENDÁRIO DINÂMICO DE RISCO & COMPARATIVO DE COMPRA DO USUÁRIO
     // =========================================================================
     function buildDefaultSchedule(horizon, baseDateStr = null) {
@@ -1486,7 +1429,6 @@
           sellLimitDate: addDays(start, 32)
         };
       }
-      // Semanal (padrão)
       return {
         buyStartDate: start,
         buyEndDate: addDays(start, 4),
@@ -2007,7 +1949,7 @@
           source: 'Banco Central do Brasil (Copom)',
           credibilityKey: 'official',
           url: 'https://www.bcb.gov.br',
-          title: 'Copom mantém postura firme no combate à inflação e sustains juros reais elevados',
+          title: 'Copom mantém postura firme no combate à inflação e sustenta juros reais elevados',
           content: 'Comunicação oficial do Banco Central reforça atratividade de títulos indexados à inflação e FIIs de papel de alta liquidez.',
           engine: 'Gemini IA + Quant',
           influenceScore: 89,
@@ -2040,37 +1982,327 @@
     }
 
     // =========================================================================
-    // 6. PERSISTÊNCIA LOCAL NO NAVEGADOR (localStorage)
+    // 6. PERSISTÊNCIA LOCAL + SINCRONIZAÇÃO EM NUVEM (SUPABASE)
     // =========================================================================
-    function updateSyncBadge(statusText = 'Salvo no Navegador') {
+    function getSupabaseConfig() {
+      try {
+        const raw = localStorage.getItem(SUPABASE_CFG_STORAGE);
+        if (!raw) return { url: '', anonKey: '', workspaceId: 'carteira-principal' };
+        const parsed = JSON.parse(raw);
+        return {
+          url: (parsed.url || '').trim(),
+          anonKey: (parsed.anonKey || '').trim(),
+          workspaceId: (parsed.workspaceId || 'carteira-principal').trim()
+        };
+      } catch (_) {
+        return { url: '', anonKey: '', workspaceId: 'carteira-principal' };
+      }
+    }
+
+    function initSupabaseClient() {
+      const cfg = getSupabaseConfig();
+      if (cfg.url && cfg.anonKey && window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+          supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+        } catch (err) {
+          console.warn('Falha ao inicializar Supabase:', err);
+          supabaseClient = null;
+        }
+      } else {
+        supabaseClient = null;
+        supabaseUser = null;
+      }
+      updateCloudStatusUI();
+    }
+
+    function getEffectiveWorkspaceId() {
+      const cfg = getSupabaseConfig();
+      if (supabaseUser && supabaseUser.id) {
+        return `user_${supabaseUser.id}`;
+      }
+      return cfg.workspaceId || 'carteira-principal';
+    }
+
+    window.signInSupabaseUser = async function () {
+      if (!supabaseClient) {
+        showToast('Salve primeiro a Project URL e Anon Key do Supabase.', 'warning');
+        return;
+      }
+      const email = (document.getElementById('sb-auth-email')?.value || '').trim();
+      const password = document.getElementById('sb-auth-pass')?.value || '';
+      if (!email || !password) {
+        showToast('Preencha e-mail e senha para entrar.', 'warning');
+        return;
+      }
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        showToast(`Erro no login: ${error.message}`, 'error');
+        return;
+      }
+      supabaseUser = data?.user || null;
+      updateCloudStatusUI('Autenticado (Supabase)');
+      await pullStateFromSupabase(true);
+    };
+
+    window.signUpSupabaseUser = async function () {
+      if (!supabaseClient) {
+        showToast('Salve primeiro a Project URL e Anon Key do Supabase.', 'warning');
+        return;
+      }
+      const email = (document.getElementById('sb-auth-email')?.value || '').trim();
+      const password = document.getElementById('sb-auth-pass')?.value || '';
+      if (!email || password.length < 6) {
+        showToast('Informe um e-mail válido e senha com no mínimo 6 caracteres.', 'warning');
+        return;
+      }
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) {
+        showToast(`Erro ao criar conta: ${error.message}`, 'error');
+        return;
+      }
+      supabaseUser = data?.user || null;
+      updateCloudStatusUI('Conta Criada');
+      showToast('Conta criada! Se a confirmação por e-mail estiver ativa no Supabase, verifique sua caixa de entrada.', 'success');
+      if (supabaseUser) await pushStateToSupabase(true);
+    };
+
+    window.signOutSupabaseUser = async function () {
+      if (supabaseClient) await supabaseClient.auth.signOut();
+      supabaseUser = null;
+      updateCloudStatusUI('Modo Workspace');
+      showToast('Sessão encerrada.', 'info');
+    };
+
+    function updateCloudStatusUI(syncState = null) {
+      const cfg = getSupabaseConfig();
+      const connected = Boolean(supabaseClient && cfg.url && cfg.anonKey);
+      const cloudDot = document.getElementById('cloud-dot');
+      const cloudLabel = document.getElementById('cloud-label');
+      const authBadge = document.getElementById('sb-auth-user-badge');
+      const signOutBtn = document.getElementById('btn-sb-signout');
+
+      if (cloudDot) {
+        cloudDot.className = connected
+          ? 'w-2 h-2 rounded-full bg-emerald-400'
+          : 'w-2 h-2 rounded-full bg-slate-500';
+      }
+      if (cloudLabel) {
+        cloudLabel.textContent = supabaseUser ? 'Conta ON' : connected ? 'Supabase ON' : 'Supabase';
+      }
+      if (authBadge) {
+        authBadge.textContent = supabaseUser?.email
+          ? `Logado: ${supabaseUser.email}`
+          : 'Modo Workspace (sem login)';
+      }
+      if (signOutBtn) {
+        signOutBtn.classList.toggle('hidden', !supabaseUser);
+      }
+      if (syncState) {
+        updateSyncBadge(syncState, connected);
+      }
+    }
+
+    function buildSerializablePayload() {
+      return {
+        version: 2,
+        savedAt: new Date().toISOString(),
+        calibration: state.calibration,
+        autoCollect: state.autoCollect,
+        macroIndicators: state.macroIndicators,
+        marketAssets: state.marketAssets,
+        analyses: state.analyses,
+        feedItems: state.feedItems,
+        selectedSignalKey: state.selectedSignalKey,
+        selectedMarketTicker: state.selectedMarketTicker
+      };
+    }
+
+    function applyLoadedPayload(parsed) {
+      if (!parsed || typeof parsed !== 'object') return false;
+      if (parsed.calibration) state.calibration = { ...state.calibration, ...parsed.calibration };
+      if (parsed.autoCollect) state.autoCollect = { ...state.autoCollect, ...parsed.autoCollect };
+      state.macroIndicators = Array.isArray(parsed.macroIndicators) && parsed.macroIndicators.length > 0
+        ? parsed.macroIndicators
+        : createInitialMacroIndicators();
+      state.marketAssets = Array.isArray(parsed.marketAssets) && parsed.marketAssets.length > 0
+        ? parsed.marketAssets
+        : createInitialMarketAssets();
+      state.analyses = Array.isArray(parsed.analyses) && parsed.analyses.length > 0
+        ? parsed.analyses
+        : createInitialAnalyses();
+      state.feedItems = Array.isArray(parsed.feedItems) && parsed.feedItems.length > 0
+        ? parsed.feedItems
+        : createInitialFeed();
+      if (parsed.selectedSignalKey) state.selectedSignalKey = parsed.selectedSignalKey;
+      if (parsed.selectedMarketTicker) state.selectedMarketTicker = parsed.selectedMarketTicker;
+
+      ensureAllSchedulesExist();
+      applyCalibrationToAllAnalyses();
+      return true;
+    }
+
+    window.pushStateToSupabase = async function (showFeedbackToast = false) {
+      if (!supabaseClient) {
+        if (showFeedbackToast) showToast('Configure a URL e Anon Key do Supabase primeiro.', 'warning');
+        return false;
+      }
+      const workspaceId = getEffectiveWorkspaceId();
+
+      try {
+        updateSyncBadge('Sincronizando Nuvem...', true);
+        const payload = buildSerializablePayload();
+        const { error } = await supabaseClient
+          .from('pulsequant_workspaces')
+          .upsert({
+            workspace_id: workspaceId,
+            user_id: supabaseUser?.id || null,
+            payload,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'workspace_id' });
+
+        if (error) throw error;
+        updateSyncBadge('Sincronizado (Supabase)', true);
+        if (showFeedbackToast) showToast(`Dados enviados para o Supabase (${supabaseUser?.email || workspaceId})!`, 'success');
+        return true;
+      } catch (err) {
+        console.warn('Erro ao sincronizar com Supabase:', err);
+        updateSyncBadge('Salvo Local (Erro Nuvem)', false);
+        if (showFeedbackToast) {
+          showToast(`Falha ao enviar ao Supabase: ${err.message || 'verifique tabela e RLS'}.`, 'error');
+        }
+        return false;
+      }
+    };
+
+    window.pullStateFromSupabase = async function (showFeedbackToast = false) {
+      if (!supabaseClient) {
+        if (showFeedbackToast) showToast('Configure a URL e Anon Key do Supabase primeiro.', 'warning');
+        return false;
+      }
+      const workspaceId = getEffectiveWorkspaceId();
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('pulsequant_workspaces')
+          .select('payload, updated_at')
+          .eq('workspace_id', workspaceId)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data && data.payload) {
+          applyLoadedPayload(data.payload);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(buildSerializablePayload()));
+          syncCalibrationControlsFromState();
+          renderAll();
+          updateSyncBadge('Carregado (Supabase)', true);
+          if (showFeedbackToast) showToast(`Dados baixados do Supabase (${workspaceId})!`, 'success');
+          return true;
+        } else {
+          await pushStateToSupabase(false);
+          if (showFeedbackToast) showToast(`Workspace "${workspaceId}" criado na nuvem com seus dados atuais!`, 'success');
+          return true;
+        }
+      } catch (err) {
+        console.warn('Erro ao buscar dados do Supabase:', err);
+        if (showFeedbackToast) {
+          showToast(`Falha ao ler do Supabase: ${err.message || 'verifique URL/Key/SQL'}.`, 'error');
+        }
+        return false;
+      }
+    };
+
+    window.openCloudModal = function () {
+      const cfg = getSupabaseConfig();
+      document.getElementById('sb-url-input').value = cfg.url;
+      document.getElementById('sb-key-input').value = cfg.anonKey;
+      document.getElementById('sb-workspace-input').value = cfg.workspaceId || 'carteira-principal';
+      const modal = document.getElementById('cloud-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeCloudModal = function () {
+      const modal = document.getElementById('cloud-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.saveSupabaseConfigAndSync = async function () {
+      const url = (document.getElementById('sb-url-input')?.value || '').trim();
+      const anonKey = (document.getElementById('sb-key-input')?.value || '').trim();
+      const workspaceId = (document.getElementById('sb-workspace-input')?.value || 'carteira-principal').trim() || 'carteira-principal';
+
+      if (!url || !anonKey) {
+        showToast('Preencha a Project URL e a Anon Key do Supabase.', 'warning');
+        return;
+      }
+
+      try {
+        localStorage.setItem(SUPABASE_CFG_STORAGE, JSON.stringify({ url, anonKey, workspaceId }));
+      } catch (_) {}
+
+      initSupabaseClient();
+      const ok = await pullStateFromSupabase(true);
+      if (ok) closeCloudModal();
+    };
+
+    window.disconnectSupabase = function () {
+      try { localStorage.removeItem(SUPABASE_CFG_STORAGE); } catch (_) {}
+      supabaseClient = null;
+      document.getElementById('sb-url-input').value = '';
+      document.getElementById('sb-key-input').value = '';
+      updateCloudStatusUI('Salvo Localmente');
+      closeCloudModal();
+      showToast('Desconectado do Supabase. Continuando em modo local no navegador.', 'info');
+    };
+
+    window.copySupabaseSql = function () {
+      const sql = document.getElementById('supabase-sql-snippet')?.textContent || '';
+      const ta = document.createElement('textarea');
+      ta.value = sql;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Script SQL copiado! Cole no SQL Editor do Supabase e clique em Run.', 'success');
+      } catch (_) {
+        showToast('Não foi possível copiar automaticamente. Selecione o texto SQL e copie.', 'warning');
+      }
+      document.body.removeChild(ta);
+    };
+
+    function updateSyncBadge(statusText = 'Salvo Localmente', isCloud = false) {
       const textEl = document.getElementById('sync-text');
       const dotEl = document.getElementById('sync-dot');
       const footerEl = document.getElementById('footer-storage-info');
       const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
       if (textEl) textEl.textContent = `${statusText} (${timeStr})`;
-      if (dotEl) dotEl.className = 'w-2 h-2 rounded-full bg-emerald-400';
+      if (dotEl) {
+        dotEl.className = isCloud
+          ? 'w-2 h-2 rounded-full bg-sky-400'
+          : 'w-2 h-2 rounded-full bg-emerald-400';
+      }
       if (footerEl) {
-        footerEl.textContent = `Armazenamento Local: ${state.analyses.length} análises • ${state.marketAssets.length} ativos monitorados`;
+        const modeLabel = isCloud ? 'Nuvem Supabase + Local' : 'Armazenamento Local';
+        footerEl.textContent = `${modeLabel}: ${state.analyses.length} análises • ${state.marketAssets.length} ativos monitorados`;
       }
     }
 
     function saveToBrowserStorage() {
       try {
-        const payload = {
-          version: 2,
-          savedAt: new Date().toISOString(),
-          calibration: state.calibration,
-          autoCollect: state.autoCollect,
-          macroIndicators: state.macroIndicators,
-          marketAssets: state.marketAssets,
-          analyses: state.analyses,
-          feedItems: state.feedItems,
-          selectedSignalKey: state.selectedSignalKey,
-          selectedMarketTicker: state.selectedMarketTicker
-        };
+        const payload = buildSerializablePayload();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        updateSyncBadge('Salvo no Navegador');
+        const hasCloud = Boolean(supabaseClient);
+        updateSyncBadge(hasCloud ? 'Sincronizando Nuvem...' : 'Salvo Localmente', hasCloud);
+
+        if (hasCloud) {
+          clearTimeout(cloudSyncDebounceTimer);
+          cloudSyncDebounceTimer = setTimeout(() => {
+            pushStateToSupabase(false);
+          }, 1200);
+        }
       } catch (err) {
         console.warn('Falha ao salvar no localStorage:', err);
       }
@@ -2081,27 +2313,8 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') {
-            if (parsed.calibration) state.calibration = { ...state.calibration, ...parsed.calibration };
-            if (parsed.autoCollect) state.autoCollect = { ...state.autoCollect, ...parsed.autoCollect };
-            state.macroIndicators = Array.isArray(parsed.macroIndicators) && parsed.macroIndicators.length > 0
-              ? parsed.macroIndicators
-              : createInitialMacroIndicators();
-            state.marketAssets = Array.isArray(parsed.marketAssets) && parsed.marketAssets.length > 0
-              ? parsed.marketAssets
-              : createInitialMarketAssets();
-            state.analyses = Array.isArray(parsed.analyses) && parsed.analyses.length > 0
-              ? parsed.analyses
-              : createInitialAnalyses();
-            state.feedItems = Array.isArray(parsed.feedItems) && parsed.feedItems.length > 0
-              ? parsed.feedItems
-              : createInitialFeed();
-            if (parsed.selectedSignalKey) state.selectedSignalKey = parsed.selectedSignalKey;
-            if (parsed.selectedMarketTicker) state.selectedMarketTicker = parsed.selectedMarketTicker;
-
-            ensureAllSchedulesExist();
-            applyCalibrationToAllAnalyses();
-            updateSyncBadge('Carregado do Navegador');
+          if (applyLoadedPayload(parsed)) {
+            updateSyncBadge('Carregado Localmente', false);
             return;
           }
         }
@@ -2109,7 +2322,6 @@
         console.warn('Erro ao ler localStorage, iniciando dados padrão:', err);
       }
 
-      // Primeira execução
       state.macroIndicators = createInitialMacroIndicators();
       state.marketAssets = createInitialMarketAssets();
       state.analyses = createInitialAnalyses();
@@ -2122,59 +2334,9 @@
     // =========================================================================
     // 7. MOTOR DE IA & FONTES REAIS DE DADOS (BRAPI, BCB, AWESOMEAPI, RSS, GEMINI)
     // =========================================================================
-    function getStoredGeminiApiKey() {
-      try {
-        return (localStorage.getItem(API_KEY_STORAGE) || '').trim();
-      } catch (_) {
-        return '';
-      }
-    }
-
-    function updateApiKeyIndicator() {
-      const key = getStoredGeminiApiKey();
-      const dot = document.getElementById('api-key-dot');
-      const label = document.getElementById('api-key-label');
-      if (dot) dot.className = key ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-amber-400';
-      if (label) label.textContent = key ? 'IA Ativa' : 'API IA';
-    }
-
-    window.openApiKeyModal = function () {
-      const input = document.getElementById('gemini-apikey-input');
-      if (input) input.value = getStoredGeminiApiKey();
-      const modal = document.getElementById('apikey-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    };
-
-    window.closeApiKeyModal = function () {
-      const modal = document.getElementById('apikey-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    };
-
-    window.saveGeminiApiKey = function () {
-      const val = (document.getElementById('gemini-apikey-input')?.value || '').trim();
-      try {
-        if (val) localStorage.setItem(API_KEY_STORAGE, val);
-        else localStorage.removeItem(API_KEY_STORAGE);
-      } catch (_) {}
-      updateApiKeyIndicator();
-      closeApiKeyModal();
-      showToast(val ? 'Chave API Gemini salva no navegador! IA e Google Search ao vivo ativados.' : 'Chave removida; operando em modo direto + heurística.', 'success');
-    };
-
-    window.clearGeminiApiKey = function () {
-      try { localStorage.removeItem(API_KEY_STORAGE); } catch (_) {}
-      const input = document.getElementById('gemini-apikey-input');
-      if (input) input.value = '';
-      updateApiKeyIndicator();
-      closeApiKeyModal();
-      showToast('Chave API removida do navegador.', 'info');
-    };
-
     async function fetchGeminiWithBackoff(payload, maxRetries = 2) {
       const apiKey = getStoredGeminiApiKey();
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`;
 
       let delay = 900;
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -2194,7 +2356,6 @@
       }
     }
 
-    // Parse resiliente: aceita JSON puro, bloco markdown ou objeto/array embutido em texto
     function extractJsonFromText(rawText) {
       if (!rawText) return null;
       const cleaned = rawText.replace(/```json/gi, '```');
@@ -2224,7 +2385,6 @@
       }
     }
 
-    // Converte números formatados no padrão BR ("132.480,50" ou "R$ 391,20") ou US ("391.20")
     function parseFlexibleNumber(val, fallback = 0) {
       if (typeof val === 'number' && !isNaN(val)) return val;
       if (!val) return fallback;
@@ -2243,7 +2403,6 @@
       return isNaN(n) ? fallback : n;
     }
 
-    // Consulta direta à Brapi API (cotações reais da B3 + histórico de fechamentos)
     async function fetchBrapiQuote(ticker) {
       const clean = ticker.toUpperCase().replace(':BVMF', '').trim();
       const url = `https://brapi.dev/api/quote/${encodeURIComponent(clean)}?range=3mo&interval=1d`;
@@ -2261,7 +2420,6 @@
       const firstHist = histRaw.length > 20 ? histRaw[histRaw.length - 21] : histRaw[0];
       const change30d = firstHist && firstHist > 0 ? ((price - firstHist) / firstHist) * 100 : changeDay;
 
-      // Calcula volatilidade anualizada real a partir do histórico se disponível
       let vol = 24;
       if (histRaw.length >= 15) {
         const rets = [];
@@ -2273,7 +2431,6 @@
         vol = Math.max(6, Math.min(85, Math.round(Math.sqrt(variance) * Math.sqrt(252) * 100)));
       }
 
-      // Calcula RSI(14) real a partir do histórico
       let rsi = 52;
       if (histRaw.length >= 15) {
         let gains = 0;
@@ -2311,7 +2468,6 @@
       };
     }
 
-    // Consulta direta de Criptomoedas e Câmbio (AwesomeAPI)
     async function fetchAwesomeQuote(pair) {
       const res = await fetch(`https://economia.awesomeapi.com.br/json/last/${pair}`);
       if (!res.ok) throw new Error('AwesomeAPI indisponível');
@@ -2320,7 +2476,6 @@
       return data[key] || null;
     }
 
-    // Consulta direta à API oficial do Banco Central do Brasil (Selic Meta série 432)
     async function fetchBcbSelic() {
       const res = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json');
       if (!res.ok) throw new Error('BCB indisponível');
@@ -2342,7 +2497,6 @@
           if (c.web?.uri && c.web?.title) list.push({ uri: c.web.uri, title: c.web.title });
         });
       }
-      // Deduplica por URI
       const seen = new Set();
       return list.filter((s) => {
         if (seen.has(s.uri)) return false;
@@ -2351,7 +2505,6 @@
       }).slice(0, 6);
     }
 
-    // Helpers visuais e de normalização para risco e ações
     function normalizeRisk(val) {
       const raw = String(val || '').toLowerCase();
       if (raw.includes('baix')) return 'Baixo';
@@ -2382,7 +2535,6 @@
       return { bg: 'bg-sky-500/15', text: 'text-sky-300', border: 'border-sky-500/30' };
     }
 
-    // Motor de Análise IA (Gemini) com fallback heurístico determinístico
     async function runAIAnalysis(newsItem) {
       const credInfo = CREDIBILITY_MAP[newsItem.credibilityKey] || CREDIBILITY_MAP.tier1;
       const today = getTodayStr();
@@ -2592,7 +2744,6 @@ Gere 1 ou 2 recomendações relevantes.`;
 
       let updatedAny = false;
 
-      // 1. Consulta paralela às APIs financeiras diretas (sem bloqueio de CORS)
       const [usdRes, btcRes, selicVal, ibovRes, ifixRes] = await Promise.allSettled([
         fetchAwesomeQuote('USD-BRL'),
         fetchAwesomeQuote('BTC-USD'),
@@ -2657,35 +2808,34 @@ Gere 1 ou 2 recomendações relevantes.`;
         }
       }
 
-      // 2. Complementa S&P 500 e demais via Gemini + Google Search
-      try {
-        const payload = {
-          contents: [{
-            parts: [{
-              text: `Busque no Google Finanças a cotação atual de hoje para S&P 500 (INDEXSP: .INX) e IBOVESPA (INDEXBVMF: IBOV).
+      if (getStoredGeminiApiKey()) {
+        try {
+          const payload = {
+            contents: [{
+              parts: [{
+                text: `Busque no Google Finanças a cotação atual de hoje para S&P 500 (INDEXSP: .INX) e IBOVESPA (INDEXBVMF: IBOV).
 Responda somente JSON:
 [{"symbol":"SPX","label":"S&P 500","value":"6.000","changePct":0.3},{"symbol":"IBOV","label":"IBOVESPA","value":"130.000","changePct":0.4}]`
-            }]
-          }],
-          tools: [{ google_search: {} }]
-        };
-        const result = await fetchGeminiWithBackoff(payload, 1);
-        const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
-        const parsed = extractJsonFromText(text);
-        if (Array.isArray(parsed)) {
-          parsed.forEach((m) => {
-            if (m.symbol && m.value) {
-              setItem(m.symbol, {
-                value: String(m.value),
-                changePct: parseFlexibleNumber(m.changePct, 0),
-                source: 'Google Finanças'
-              });
-              updatedAny = true;
-            }
-          });
-        }
-      } catch (_) {
-        // Segue com os dados reais obtidos pelas APIs diretas
+              }]
+            }],
+            tools: [{ google_search: {} }]
+          };
+          const result = await fetchGeminiWithBackoff(payload, 1);
+          const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
+          const parsed = extractJsonFromText(text);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((m) => {
+              if (m.symbol && m.value) {
+                setItem(m.symbol, {
+                  value: String(m.value),
+                  changePct: parseFlexibleNumber(m.changePct, 0),
+                  source: 'Google Finanças'
+                });
+                updatedAny = true;
+              }
+            });
+          }
+        } catch (_) {}
       }
 
       if (updatedAny) {
@@ -2700,7 +2850,6 @@ Responda somente JSON:
       if (btn) btn.disabled = false;
     };
 
-    // Busca notícias financeiras reais via RSS convertido em JSON (fallback confiável sem CORS)
     async function fetchFinancialRssNews(topicQuery) {
       const q = encodeURIComponent(`${topicQuery} mercado financeiro`);
       const rssUrl = `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
@@ -2739,7 +2888,6 @@ Responda somente JSON:
       });
     }
 
-    // Coletor automático de notícias reais (Camada 1: Gemini + Google Search | Camada 2: RSS Google Finanças BR)
     window.collectRealTimeNews = async function (autoAnalyzeTop1 = false) {
       const btn = document.getElementById('btn-auto-collect-now');
       const btnText = document.getElementById('btn-collect-now-text');
@@ -2752,39 +2900,35 @@ Responda somente JSON:
       let collectedList = [];
       let sources = [];
 
-      // Camada 1: Gemini com Google Search Grounding
-      try {
-        const today = getTodayStr();
-        const payload = {
-          contents: [{
-            parts: [{
-              text: `Hoje é ${today}. Pesquise notícias financeiras recentes de hoje sobre: "${topic}".
+      if (getStoredGeminiApiKey()) {
+        try {
+          const today = getTodayStr();
+          const payload = {
+            contents: [{
+              parts: [{
+                text: `Hoje é ${today}. Pesquise notícias financeiras recentes de hoje sobre: "${topic}".
 Retorne APENAS um JSON array com 4 notícias reais:
 [{"source":"Veículo","credibilityKey":"tier1","url":"https://...","title":"Título","content":"Resumo de 2 frases"}]`
-            }]
-          }],
-          tools: [{ google_search: {} }]
-        };
+              }]
+            }],
+            tools: [{ google_search: {} }]
+          };
 
-        const result = await fetchGeminiWithBackoff(payload, 1);
-        const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
-        const parsed = extractJsonFromText(text);
-        sources = extractGroundingSources(result);
+          const result = await fetchGeminiWithBackoff(payload, 1);
+          const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
+          const parsed = extractJsonFromText(text);
+          sources = extractGroundingSources(result);
 
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          collectedList = parsed;
-        }
-      } catch (_) {
-        // Aciona camada 2 (RSS ao vivo)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            collectedList = parsed;
+          }
+        } catch (_) {}
       }
 
-      // Camada 2: Fallback automático via RSS Google Notícias Finanças (tempo real sem CORS)
       if (collectedList.length === 0) {
         try {
           collectedList = await fetchFinancialRssNews(topic);
-        } catch (_) {
-          // Segue para tratamento abaixo
-        }
+        } catch (_) {}
       }
 
       try {
@@ -2910,8 +3054,7 @@ Retorne APENAS um JSON array com 4 notícias reais:
       const t = horizonDays / 252;
       const sqrtT = Math.sqrt(t);
 
-      // Drift anualizado derivado da tendência recente + score de oportunidade + DY
-      const scoreDrift = ((Number(asset.score) || 70) - 62) / 100; // -0.15 .. +0.35
+      const scoreDrift = ((Number(asset.score) || 70) - 62) / 100;
       const momentumDrift = Math.max(-0.25, Math.min(0.30, (Number(asset.change30d) || 0) / 100 * 1.4));
       const baseAnnualDrift = scoreDrift * 0.55 + momentumDrift * 0.45;
 
@@ -2974,7 +3117,6 @@ Retorne APENAS um JSON array com 4 notícias reais:
       let geminiData = null;
       let citations = [];
 
-      // Camada 1: Consulta direta em tempo real na B3 (Brapi) ou Cripto (AwesomeAPI)
       try {
         if (rawTicker === 'BTC' || rawTicker === 'BITCOIN') {
           const btc = await fetchAwesomeQuote('BTC-BRL');
@@ -3001,16 +3143,14 @@ Retorne APENAS um JSON array com 4 notícias reais:
         } else {
           brapiData = await fetchBrapiQuote(rawTicker);
         }
-      } catch (_) {
-        // Segue para camada 2 (Gemini + Google Search)
-      }
+      } catch (_) {}
 
-      // Camada 2: Consulta ao Google Finanças via Gemini Search Grounding (enriquece fundamentos e notícias ou fornece cotação de ativos EUA/globais)
-      try {
-        const payload = {
-          contents: [{
-            parts: [{
-              text: `Busque no Google Finanças (google.com/finance) a cotação atual de hoje para "${rawTicker}".
+      if (getStoredGeminiApiKey()) {
+        try {
+          const payload = {
+            contents: [{
+              parts: [{
+                text: `Busque no Google Finanças (google.com/finance) a cotação atual de hoje para "${rawTicker}".
 Retorne APENAS um JSON válido:
 {
   "ticker": "${rawTicker}",
@@ -3035,17 +3175,16 @@ Retorne APENAS um JSON válido:
   "summary": "Resumo objetivo do momento do ativo em 2 frases.",
   "recentNews": ["Manchete recente sobre o ativo"]
 }`
-            }]
-          }],
-          tools: [{ google_search: {} }]
-        };
+              }]
+            }],
+            tools: [{ google_search: {} }]
+          };
 
-        const result = await fetchGeminiWithBackoff(payload, 1);
-        const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
-        geminiData = extractJsonFromText(text);
-        citations = extractGroundingSources(result);
-      } catch (_) {
-        // Se Brapi funcionou, já temos o preço real
+          const result = await fetchGeminiWithBackoff(payload, 1);
+          const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
+          geminiData = extractJsonFromText(text);
+          citations = extractGroundingSources(result);
+        } catch (_) {}
       }
 
       try {
@@ -3061,7 +3200,6 @@ Retorne APENAS um JSON válido:
         const rsiNum = brapiData?.rsi || Math.max(10, Math.min(90, Math.round(parseFlexibleNumber(geminiData?.rsi, existingLocal?.rsi || 52))));
         const dyNum = Math.max(0, parseFlexibleNumber(geminiData?.dy, existingLocal?.dy || 0));
 
-        // Monta histórico real (se veio da Brapi) ou série calibrada ao preço real de hoje
         let history252;
         if (brapiData?.histRaw && brapiData.histRaw.length >= 20) {
           const older = generateHistoricalSeries(brapiData.histRaw[0], ch30, volNum, Math.max(30, 252 - brapiData.histRaw.length), cleanTicker);
@@ -3123,7 +3261,7 @@ Retorne APENAS um JSON válido:
         if (localMatch) {
           state.selectedMarketTicker = localMatch.ticker;
           renderMarketTab();
-          showToast(`Consulta externa falhou para ${rawTicker}. Você pode clicar no ícone de lápis ao lado do preço para ajustar manualmente.`, 'warning');
+          showToast(`Consulta externa indisponível para ${rawTicker}. Use o ícone de lápis ao lado do preço para ajustar manualmente.`, 'warning');
         } else {
           showToast(`Não foi possível obter a cotação de ${rawTicker} agora. Verifique o código do ticker (ex: IVVB11, PETR4, MXRF11).`, 'error');
         }
@@ -3211,7 +3349,6 @@ Retorne APENAS um JSON válido:
       renderMarketAssetsList();
     };
 
-    // Converte o ativo analisado no Google Finanças em um Sinal + Calendário no Dashboard
     window.sendSelectedAssetToDashboardSignal = function () {
       const asset = state.marketAssets.find((a) => a.ticker === state.selectedMarketTicker) || state.marketAssets[0];
       if (!asset) return;
@@ -3425,7 +3562,6 @@ Retorne APENAS um JSON válido:
         </div>
       `;
 
-      // Atualiza botões de janela histórica e projeção
       document.querySelectorAll('.hrange-btn').forEach((b) => {
         const active = b.dataset.hrange === state.marketHistoryRange;
         b.className = active
@@ -3481,7 +3617,7 @@ Retorne APENAS um JSON válido:
         : '';
 
       document.getElementById('ma-news-and-sources').innerHTML = `
-        <div class="text-xs font-bold text-white">Fatores & Notícias Recentes (${escapeHtml(asset.ticker)})</div>
+        <div class="text-xs font-bold text-white">Fatores &amp; Notícias Recentes (${escapeHtml(asset.ticker)})</div>
         <ul class="space-y-1.5">${newsHtml}</ul>
         ${citationsHtml}
       `;
@@ -3516,7 +3652,6 @@ Retorne APENAS um JSON válido:
         histPoints.push(asset.price);
       }
 
-      // Média móvel simples (SMA 5 pontos) no histórico
       const smaPoints = histPoints.map((_, idx) => {
         const start = Math.max(0, idx - 4);
         const sub = histPoints.slice(start, idx + 1);
@@ -3681,7 +3816,6 @@ Retorne APENAS um JSON válido:
 
       document.getElementById('kpi-total-news').textContent = analyses.length;
 
-      // Sentimento médio
       const avgSent = analyses.length > 0
         ? Math.round(analyses.reduce((sum, a) => sum + (Number(a.sentimentScore) || 0), 0) / analyses.length)
         : 0;
@@ -3690,7 +3824,6 @@ Retorne APENAS um JSON válido:
       sentEl.className = `text-3xl font-bold font-mono ${avgSent >= 15 ? 'text-emerald-400' : avgSent <= -15 ? 'text-rose-400' : 'text-amber-400'}`;
       document.getElementById('kpi-sentiment-label').textContent = avgSent >= 15 ? 'Otimista' : avgSent <= -15 ? 'Defensivo / Cautela' : 'Neutro';
 
-      // Minhas compras
       const traded = allSignals.filter((s) => s.rec.userTrade && s.rec.userTrade.buyDate);
       const inGreen = traded.filter((s) => {
         const comp = evaluateUserTradeComparison(s.rec);
@@ -3699,7 +3832,6 @@ Retorne APENAS um JSON válido:
       document.getElementById('kpi-user-trades').textContent = traded.length;
       document.getElementById('kpi-user-trades-sub').textContent = `${inGreen.length} na zona verde`;
 
-      // Acurácia histórica
       const audited = allSignals.filter((s) => s.rec.feedback && s.rec.feedback.status !== 'Pendente');
       if (audited.length > 0) {
         const pts = audited.reduce((sum, s) => sum + (s.rec.feedback.status === 'Acertou' ? 1 : s.rec.feedback.status === 'Parcial' ? 0.5 : 0), 0);
@@ -3794,7 +3926,6 @@ Retorne APENAS um JSON válido:
         </p>
       `;
 
-      // Renderizar grade mensal
       const year = state.calendarViewYear;
       const month = state.calendarViewMonth;
       const monthName = new Date(year, month, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -3833,7 +3964,6 @@ Retorne APENAS um JSON válido:
 
       document.getElementById('calendar-days-grid').innerHTML = cells.join('');
 
-      // Caixa lateral: Comparativo da Minha Compra
       const compBox = document.getElementById('user-trade-comparison-box');
       if (comp && trade) {
         compBox.innerHTML = `
@@ -3875,7 +4005,6 @@ Retorne APENAS um JSON válido:
     }
 
     function renderSignalsGrid() {
-      // Atualiza botões de filtro de horizonte
       document.querySelectorAll('.horizon-btn').forEach((btn) => {
         const active = btn.dataset.horizon === state.horizonFilter;
         btn.className = active
@@ -3890,7 +4019,6 @@ Retorne APENAS um JSON válido:
 
       document.getElementById('signals-count-label').textContent = `${filtered.length} sinais exibidos`;
 
-      // Garante um sinal selecionado válido
       let selected = filtered.find((s) => s.key === state.selectedSignalKey) || filtered[0] || all[0] || null;
       if (selected) state.selectedSignalKey = selected.key;
 
@@ -3917,7 +4045,6 @@ Retorne APENAS um JSON válido:
         const todayInfo = getDayRiskInfo(today, sched);
         const comp = evaluateUserTradeComparison(rec);
 
-        // Mini barra de 8 dias a partir do Dia 1 do sinal
         const totalSpan = Math.max(4, diffDays(sched.buyStartDate, sched.sellLimitDate) + 1);
         const barSteps = Math.min(10, totalSpan);
         const stepSize = totalSpan / barSteps;
@@ -3947,7 +4074,6 @@ Retorne APENAS um JSON válido:
 
               <p class="text-xs text-slate-300 line-clamp-2 leading-snug">${escapeHtml(analysis.title)}</p>
 
-              <!-- Mini-Calendário de Risco Progressivo -->
               <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/90 space-y-1.5">
                 <div class="flex items-center justify-between text-[10px] font-mono">
                   <span class="text-emerald-400">Verde: ${formatDateShort(sched.buyStartDate)}→${formatDateShort(sched.buyEndDate)}</span>
@@ -3962,7 +4088,6 @@ Retorne APENAS um JSON válido:
                 </div>
               </div>
 
-              <!-- Barra Probabilidade Ganho vs Perda -->
               <div class="space-y-1">
                 <div class="flex justify-between text-[11px] font-mono">
                   <span class="text-emerald-400">Ganho ${rec.gainProbability}%</span>
@@ -4001,8 +4126,12 @@ Retorne APENAS um JSON válido:
     };
 
     function renderCharts(signalItem) {
-      const decayCtx = document.getElementById('decayChart').getContext('2d');
-      const scenCtx = document.getElementById('scenarioChart').getContext('2d');
+      const decayCanvas = document.getElementById('decayChart');
+      const scenCanvas = document.getElementById('scenarioChart');
+      if (!decayCanvas || !scenCanvas) return;
+
+      const decayCtx = decayCanvas.getContext('2d');
+      const scenCtx = scenCanvas.getContext('2d');
 
       if (decayChartInstance) decayChartInstance.destroy();
       if (scenarioChartInstance) scenarioChartInstance.destroy();
@@ -4222,7 +4351,6 @@ Retorne APENAS um JSON válido:
         notes
       };
 
-      // Sincroniza retorno real na auditoria se preenchido compra e venda
       if (syncFb && rec.userTrade.buyPrice && rec.userTrade.sellPrice && rec.userTrade.buyPrice > 0) {
         const pct = ((rec.userTrade.sellPrice - rec.userTrade.buyPrice) / rec.userTrade.buyPrice) * 100;
         rec.feedback = {
@@ -4235,7 +4363,7 @@ Retorne APENAS um JSON válido:
       saveToBrowserStorage();
       closeTradeModal();
       renderAll();
-      showToast(`Compra em ${rec.asset} salva no navegador com comparativo atualizado!`, 'success');
+      showToast(`Compra em ${rec.asset} salva com comparativo atualizado!`, 'success');
     };
 
     window.deleteUserTrade = function () {
@@ -4251,7 +4379,6 @@ Retorne APENAS um JSON válido:
       showToast('Registro de compra removido.', 'info');
     };
 
-    // Modal de ajuste das datas do calendário
     window.openSelectedScheduleModal = function () {
       const item = getSelectedSignalItem();
       if (!item) return;
@@ -4301,7 +4428,7 @@ Retorne APENAS um JSON válido:
       saveToBrowserStorage();
       closeScheduleModal();
       renderAll();
-      showToast('Datas do calendário atualizadas e salvas no navegador!', 'success');
+      showToast('Datas do calendário atualizadas!', 'success');
     };
 
     // =========================================================================
@@ -4395,7 +4522,7 @@ Retorne APENAS um JSON válido:
         state.selectedSignalKey = `${newAnalysis.id}::0`;
         saveToBrowserStorage();
         renderAll();
-        showToast(`Análise concluída (${newAnalysis.engine}) e salva no navegador!`, 'success');
+        showToast(`Análise concluída (${newAnalysis.engine})!`, 'success');
         switchTab('dashboard');
       } finally {
         if (btn) btn.disabled = false;
@@ -4405,6 +4532,7 @@ Retorne APENAS um JSON válido:
 
     function renderNewsFeed() {
       const container = document.getElementById('news-feed-list');
+      if (!container) return;
       document.getElementById('feed-count-badge').textContent = `${state.feedItems.length} notícias`;
 
       container.innerHTML = state.feedItems.map((item) => {
@@ -4509,7 +4637,7 @@ Retorne APENAS um JSON válido:
       applyCalibrationToAllAnalyses();
       saveToBrowserStorage();
       renderAll();
-      showToast('Calibração salva no navegador e sinais recalculados!', 'success');
+      showToast('Calibração salva e sinais recalculados!', 'success');
     };
 
     // =========================================================================
@@ -4517,6 +4645,7 @@ Retorne APENAS um JSON válido:
     // =========================================================================
     function renderUserTradesComparativeCards() {
       const container = document.getElementById('user-trades-comparative-cards');
+      if (!container) return;
       const allSignals = getAllSignalsFlattened();
       const traded = allSignals
         .filter((s) => s.rec.userTrade && s.rec.userTrade.buyDate)
@@ -4612,6 +4741,7 @@ Retorne APENAS um JSON válido:
 
     window.renderHistoryTable = function () {
       const tbody = document.getElementById('history-table-body');
+      if (!tbody) return;
       const query = (document.getElementById('history-search').value || '').toLowerCase().trim();
       const statusFilter = document.getElementById('history-status-filter').value;
 
@@ -4693,7 +4823,6 @@ Retorne APENAS um JSON válido:
       }).join('');
     };
 
-    // Modal de Feedback
     window.openFeedbackModal = function (analysisId, recIndex) {
       const anl = state.analyses.find((a) => a.id === analysisId);
       if (!anl || !anl.recommendations[recIndex]) return;
@@ -4737,10 +4866,9 @@ Retorne APENAS um JSON válido:
       saveToBrowserStorage();
       closeFeedbackModal();
       renderAll();
-      showToast('Auditoria de feedback salva no navegador!', 'success');
+      showToast('Auditoria de feedback salva!', 'success');
     };
 
-    // Modal de Detalhes
     window.openDetailModal = function (analysisId, recIndex) {
       const anl = state.analyses.find((a) => a.id === analysisId);
       if (!anl || !anl.recommendations[recIndex]) return;
@@ -4796,7 +4924,6 @@ Retorne APENAS um JSON válido:
       modal.classList.remove('flex');
     };
 
-    // Modal Reset LocalStorage
     window.openResetModal = function () {
       const modal = document.getElementById('reset-modal');
       modal.classList.remove('hidden');
@@ -4828,7 +4955,6 @@ Retorne APENAS um JSON válido:
       showToast('Armazenamento local restaurado para os dados iniciais.', 'info');
     };
 
-    // Exportação CSV (inclui datas do calendário e compra do usuário)
     window.exportCSV = function () {
       const rows = getAllSignalsFlattened();
       if (rows.length === 0) {
@@ -4887,7 +5013,6 @@ Retorne APENAS um JSON válido:
       showToast('Histórico + compras exportado em CSV (UTF-8)!', 'success');
     };
 
-    // Exportação JSON
     window.exportJSON = function () {
       const payload = {
         exportedAt: new Date().toISOString(),
@@ -4902,7 +5027,6 @@ Retorne APENAS um JSON válido:
       showToast('Backup completo JSON exportado!', 'success');
     };
 
-    // Importação JSON
     window.handleImportJSON = async function (event) {
       const file = event.target.files?.[0];
       if (!file) return;
@@ -4922,7 +5046,7 @@ Retorne APENAS um JSON válido:
           applyCalibrationToAllAnalyses();
           saveToBrowserStorage();
           renderAll();
-          showToast(`${data.analyses.length} análises importadas e salvas no navegador!`, 'success');
+          showToast(`${data.analyses.length} análises importadas e salvas!`, 'success');
         } else if (Array.isArray(data)) {
           let count = 0;
           for (const item of data) {
@@ -4941,7 +5065,7 @@ Retorne APENAS um JSON válido:
           }
           saveToBrowserStorage();
           renderNewsFeed();
-          showToast(`${count} notícias adicionadas ao Feed e salvas no navegador!`, 'success');
+          showToast(`${count} notícias adicionadas ao Feed!`, 'success');
         } else {
           showToast('Formato JSON não reconhecido.', 'error');
         }
@@ -4966,6 +5090,296 @@ Retorne APENAS um JSON válido:
     // =========================================================================
     // 14. NAVEGAÇÃO ENTRE ABAS E INICIALIZAÇÃO
     // =========================================================================
+    // 14. CARTEIRA CONSOLIDADA, POSITION SIZING & CENTRAL DE ALERTAS
+    // =========================================================================
+    function generateSmartAlerts() {
+      const today = getTodayStr();
+      const alerts = [];
+      const allSignals = getAllSignalsFlattened();
+
+      allSignals.forEach(({ analysis, rec, analysisId, recIndex }) => {
+        const sched = rec.schedule || buildDefaultSchedule(rec.horizon);
+        const info = getDayRiskInfo(today, sched);
+        const trade = rec.userTrade;
+
+        if (trade && trade.buyDate && !trade.sellDate) {
+          if (info.zone === 'sell' || info.zone === 'expired') {
+            alerts.push({
+              level: 'sell',
+              title: `Hora de Realizar/Sacar: ${rec.asset}`,
+              desc: `Posição aberta desde ${formatDateShort(trade.buyDate)} atingiu a janela de saída (${formatDateShort(sched.sellTargetDate)} → ${formatDateShort(sched.sellLimitDate)}).`,
+              actionLabel: 'Registrar Venda',
+              onClick: `closeAlertsModal(); openTradeModal('${analysisId}', ${recIndex})`
+            });
+          }
+        } else if (!trade?.buyDate && info.isGreenZone && rec.action.includes('COMPR')) {
+          const daysLeft = diffDays(today, sched.buyEndDate);
+          alerts.push({
+            level: 'green',
+            title: `Janela Verde Aberta: ${rec.asset} (${rec.horizon})`,
+            desc: `Restam ${daysLeft} dia(s) para entrada ideal com risco base de ${rec.lossProbability}%.`,
+            actionLabel: 'Ver Calendário',
+            onClick: `closeAlertsModal(); switchTab('dashboard'); selectSignalForCharts('${analysisId}::${recIndex}')`
+          });
+        }
+      });
+
+      createEconomicEvents().forEach((ev) => {
+        const dLeft = diffDays(today, ev.date);
+        if (dLeft >= 0 && dLeft <= 3) {
+          alerts.push({
+            level: 'macro',
+            title: `Evento Macro em ${dLeft === 0 ? 'HOJE' : dLeft + 'd'}: ${ev.title}`,
+            desc: `Impacto ${ev.impact} em ${ev.assets}.`,
+            actionLabel: 'Abrir Radar Macro',
+            onClick: `closeAlertsModal(); switchTab('market')`
+          });
+        }
+      });
+
+      return alerts;
+    }
+
+    function updateAlertsBadge() {
+      const alerts = generateSmartAlerts();
+      const badge = document.getElementById('alerts-badge-count');
+      if (!badge) return;
+      if (alerts.length > 0) {
+        badge.textContent = alerts.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    window.openAlertsModal = function () {
+      const alerts = generateSmartAlerts();
+      const container = document.getElementById('alerts-modal-list');
+      if (alerts.length === 0) {
+        container.innerHTML = `<div class="p-6 rounded-xl bg-slate-950 border border-slate-800 text-center text-xs text-slate-400">Nenhum alerta crítico no momento. Suas janelas e posições estão sob controle.</div>`;
+      } else {
+        container.innerHTML = alerts.map((a) => {
+          const style = a.level === 'sell'
+            ? 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+            : a.level === 'green'
+              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
+              : 'bg-amber-950/40 border-amber-500/40 text-amber-200';
+          return `
+            <div class="p-3.5 rounded-xl border ${style} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-0.5">
+                <div class="text-xs font-bold">${escapeHtml(a.title)}</div>
+                <p class="text-[11px] opacity-85">${escapeHtml(a.desc)}</p>
+              </div>
+              <button onclick="${a.onClick}" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 text-[11px] font-semibold transition">
+                ${escapeHtml(a.actionLabel)}
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+      const modal = document.getElementById('alerts-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeAlertsModal = function () {
+      const modal = document.getElementById('alerts-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.syncSizingWithSelectedAsset = function () {
+      const asset = state.marketAssets.find((a) => a.ticker === state.selectedMarketTicker) || state.marketAssets[0];
+      if (!asset) return;
+      document.getElementById('ps-entry').value = asset.price;
+      document.getElementById('ps-stop').value = asset.support || Number((asset.price * 0.94).toFixed(2));
+      calculatePositionSizing();
+      showToast(`Preços de entrada e suporte carregados de ${asset.ticker}!`, 'info');
+    };
+
+    window.calculatePositionSizing = function () {
+      const box = document.getElementById('ps-result-box');
+      if (!box) return;
+
+      const capital = parseFloat(document.getElementById('ps-capital')?.value || '0');
+      const riskPct = parseFloat(document.getElementById('ps-risk-pct')?.value || '0');
+      const entry = parseFloat(document.getElementById('ps-entry')?.value || '0');
+      const stop = parseFloat(document.getElementById('ps-stop')?.value || '0');
+
+      const riskMoney = Math.max(0, capital * (riskPct / 100));
+      const stopDist = Math.abs(entry - stop);
+      const stopPct = entry > 0 ? (stopDist / entry) * 100 : 0;
+      const maxUnits = stopDist > 0 ? Math.floor(riskMoney / stopDist) : 0;
+      const suggestedAlloc = Math.min(capital, maxUnits * entry);
+      const allocPct = capital > 0 ? (suggestedAlloc / capital) * 100 : 0;
+
+      box.innerHTML = `
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="text-[10px] text-slate-400">Risco Máximo (R$)</div>
+          <div class="font-mono font-bold text-sm text-rose-400 mt-0.5">R$ ${riskMoney.toFixed(2)}</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="text-[10px] text-slate-400">Distância Stop</div>
+          <div class="font-mono font-bold text-sm text-amber-300 mt-0.5">${stopPct.toFixed(2)}%</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-emerald-500/30">
+          <div class="text-[10px] text-emerald-300">Qtd. Ideal de Cotas/Ações</div>
+          <div class="font-mono font-extrabold text-sm text-emerald-400 mt-0.5">${maxUnits} unid.</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-sky-500/30">
+          <div class="text-[10px] text-sky-300">Aporte Recomendado</div>
+          <div class="font-mono font-extrabold text-sm text-sky-300 mt-0.5">R$ ${suggestedAlloc.toFixed(2)} <span class="text-[10px] font-normal">(${allocPct.toFixed(1)}%)</span></div>
+        </div>
+      `;
+    };
+
+    function renderPortfolioTab() {
+      calculatePositionSizing();
+
+      const allSignals = getAllSignalsFlattened();
+      const trades = allSignals.filter((s) => s.rec.userTrade && s.rec.userTrade.buyDate);
+
+      let totalOpenInvested = 0;
+      let totalOpenCurrent = 0;
+      let totalClosedPnl = 0;
+      let weightedRiskSum = 0;
+      let openCount = 0;
+      const classMap = {};
+
+      const rowsHtml = trades.map(({ analysisId, recIndex, rec }) => {
+        const ut = rec.userTrade;
+        const mAsset = state.marketAssets.find((a) => a.ticker.toUpperCase() === rec.asset.toUpperCase());
+        const buyPrice = Number(ut.buyPrice) || mAsset?.price || 100;
+        const invested = Number(ut.investedAmount) || buyPrice * 10;
+        const qty = invested / buyPrice;
+        const isClosed = Boolean(ut.sellDate && ut.sellPrice);
+        const refPrice = isClosed ? Number(ut.sellPrice) : (mAsset?.price || buyPrice);
+        const currentVal = qty * refPrice;
+        const pnl = currentVal - invested;
+        const pnlPct = invested > 0 ? (pnl / invested) * 100 : 0;
+
+        if (isClosed) {
+          totalClosedPnl += pnl;
+        } else {
+          openCount++;
+          totalOpenInvested += invested;
+          totalOpenCurrent += currentVal;
+          weightedRiskSum += invested * (Number(rec.lossProbability) || 30);
+
+          const cls = mAsset?.assetClass || (rec.sector.includes('FII') || rec.sector.includes('Imobili') ? 'FII' : rec.sector.includes('ETF') ? 'ETF' : 'Ação B3');
+          classMap[cls] = (classMap[cls] || 0) + currentVal;
+        }
+
+        const todayInfo = getDayRiskInfo(getTodayStr(), rec.schedule);
+        const statusBadge = isClosed
+          ? '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-semibold">Encerrada</span>'
+          : todayInfo.zone === 'sell' || todayInfo.zone === 'expired'
+            ? '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-bold">Sinal de Saída</span>'
+            : '<span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold">Em Carteira</span>';
+
+        return `
+          <tr class="hover:bg-slate-900/50 transition">
+            <td class="py-3 px-4">
+              <div class="font-mono font-bold text-white">${escapeHtml(rec.asset)} <span class="text-[10px] font-normal text-slate-400">(${escapeHtml(rec.horizon)})</span></div>
+              <div class="text-[10px] text-slate-400">${escapeHtml(rec.sector)}</div>
+            </td>
+            <td class="py-3 px-3 font-mono text-[11px] text-slate-300">
+              <div>Ent: ${formatDateShort(ut.buyDate)}</div>
+              <div class="text-[10px] text-slate-500">${ut.sellDate ? `Saída: ${formatDateShort(ut.sellDate)}` : `Alvo: ${formatDateShort(rec.schedule.sellTargetDate)}`}</div>
+            </td>
+            <td class="py-3 px-3 text-right font-mono">
+              <div class="text-white font-semibold">R$ ${invested.toFixed(2)}</div>
+              <div class="text-[10px] text-slate-400">@ ${buyPrice.toFixed(2)}</div>
+            </td>
+            <td class="py-3 px-3 text-right font-mono">
+              <div class="text-sky-300 font-semibold">R$ ${currentVal.toFixed(2)}</div>
+              <div class="text-[10px] text-slate-400">@ ${refPrice.toFixed(2)}</div>
+            </td>
+            <td class="py-3 px-3 text-right font-mono font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+              <div>${pnl >= 0 ? '+' : ''}R$ ${pnl.toFixed(2)}</div>
+              <div class="text-[10px]">${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%</div>
+            </td>
+            <td class="py-3 px-3 text-center">${statusBadge}</td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="openTradeModal('${analysisId}', ${recIndex})" class="px-2.5 py-1 rounded-lg bg-violet-500/15 hover:bg-violet-500 text-violet-300 hover:text-white border border-violet-500/30 text-[11px] font-semibold transition">
+                Gerenciar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const totalPnl = (totalOpenCurrent - totalOpenInvested) + totalClosedPnl;
+      const totalBase = totalOpenInvested > 0 ? totalOpenInvested : 1;
+      const totalPnlPct = (totalPnl / totalBase) * 100;
+      const avgRisk = totalOpenInvested > 0 ? Math.round(weightedRiskSum / totalOpenInvested) : 0;
+
+      document.getElementById('pf-kpi-invested').textContent = `R$ ${totalOpenInvested.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('pf-kpi-open-count').textContent = `${openCount} posição(ões) em aberto`;
+      document.getElementById('pf-kpi-current').textContent = `R$ ${totalOpenCurrent.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const pnlEl = document.getElementById('pf-kpi-pnl');
+      pnlEl.textContent = `${totalPnl >= 0 ? '+' : ''}R$ ${totalPnl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      pnlEl.className = `text-2xl sm:text-3xl font-bold font-mono mt-2 ${totalPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      document.getElementById('pf-kpi-pnl-pct').textContent = `${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}% acumulado`;
+
+      document.getElementById('pf-kpi-risk').textContent = totalOpenInvested > 0 ? `${avgRisk}%` : '--%';
+      document.getElementById('pf-kpi-risk-label').textContent = avgRisk > 40 ? 'Atenção: exposição elevada' : 'risco ponderado controlado';
+
+      const tbody = document.getElementById('portfolio-positions-tbody');
+      if (tbody) {
+        tbody.innerHTML = rowsHtml || `<tr><td colspan="7" class="py-8 text-center text-slate-400">Nenhuma compra registrada ainda. Clique em qualquer dia verde do calendário no Dashboard para adicionar sua primeira operação.</td></tr>`;
+      }
+
+      // Renderiza gráfico doughnut de alocação
+      const allocCanvas = document.getElementById('portfolioAllocChart');
+      if (allocCanvas) {
+        if (portfolioAllocChartInstance) portfolioAllocChartInstance.destroy();
+        const labels = Object.keys(classMap);
+        const values = Object.values(classMap);
+
+        portfolioAllocChartInstance = new Chart(allocCanvas.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: labels.length > 0 ? labels : ['Sem posições abertas'],
+            datasets: [{
+              data: values.length > 0 ? values : [1],
+              backgroundColor: values.length > 0
+                ? ['#10b981', '#38bdf8', '#8b5cf6', '#f59e0b', '#f43f5e', '#14b8a6']
+                : ['#1e293b'],
+              borderColor: '#0f1623',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '64%',
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: { color: '#cbd5e1', boxWidth: 10, font: { size: 11 } }
+              }
+            }
+          }
+        });
+
+        const warnEl = document.getElementById('pf-concentration-warning');
+        if (warnEl) {
+          if (labels.length === 1 && values[0] > 0) {
+            warnEl.innerHTML = `<span class="text-amber-400 font-semibold">Alerta de Concentração:</span> 100% da carteira aberta está em <strong>${escapeHtml(labels[0])}</strong>. Considere diversificar classes.`;
+          } else if (labels.length > 1) {
+            warnEl.innerHTML = `<span class="text-emerald-400 font-semibold">Diversificação Ativa:</span> Capital distribuído em ${labels.length} classe(s) de ativos.`;
+          } else {
+            warnEl.textContent = 'Registre compras nos calendários para visualizar a distribuição da sua carteira.';
+          }
+        }
+      }
+    }
+
+    // =========================================================================
+    // 15. NAVEGAÇÃO ENTRE ABAS E INICIALIZAÇÃO
+    // =========================================================================
     window.switchTab = function (tabName) {
       state.activeTab = tabName;
       document.querySelectorAll('.tab-section').forEach((sec) => sec.classList.add('hidden'));
@@ -4981,6 +5395,8 @@ Retorne APENAS um JSON válido:
 
       if (tabName === 'dashboard') {
         renderSignalsGrid();
+      } else if (tabName === 'portfolio') {
+        renderPortfolioTab();
       } else if (tabName === 'market') {
         renderMarketTab();
       } else if (tabName === 'news') {
@@ -5001,7 +5417,9 @@ Retorne APENAS um JSON válido:
     function renderAll() {
       renderMacroTickerStrip();
       renderKPIs();
+      updateAlertsBadge();
       renderSignalsGrid();
+      renderPortfolioTab();
       renderMarketTab();
       renderNewsFeed();
       updateAutoCollectStatusPill();
@@ -5010,13 +5428,23 @@ Retorne APENAS um JSON válido:
       renderHistoryTable();
     }
 
-    function bootstrapApp() {
+    async function bootstrapApp() {
       loadFromBrowserStorage();
+      initSupabaseClient();
       updateApiKeyIndicator();
       syncCalibrationControlsFromState();
       setupAutoCollectTimer();
       switchTab('dashboard');
       renderAll();
+
+      if (supabaseClient) {
+        try {
+          const { data } = await supabaseClient.auth.getUser();
+          supabaseUser = data?.user || null;
+          updateCloudStatusUI();
+        } catch (_) {}
+        await pullStateFromSupabase(false);
+      }
     }
 
     if (document.readyState === 'loading') {
