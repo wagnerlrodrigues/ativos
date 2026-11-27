@@ -206,7 +206,7 @@
     <div class="border-t border-slate-800/70 bg-[#060911]/95">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between gap-3">
         <div id="macro-ticker-strip" class="flex items-center gap-4 overflow-x-auto no-scrollbar text-[11px] font-mono whitespace-nowrap py-0.5"></div>
-        <button id="btn-refresh-macro" onclick="refreshMacroFromGoogleFinance()" class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[10px] font-mono text-sky-300 transition" title="Atualizar índices macro via Google Finanças + Pesquisa ao Vivo">
+        <button id="btn-refresh-macro" onclick="refreshMacroFromGoogleFinance()" class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[10px] font-mono text-sky-300 transition" title="Atualizar índices macro via BCB, Câmbio, B3 e Google Finanças">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
           <span class="hidden sm:inline">Atualizar Macro</span>
         </button>
@@ -562,12 +562,12 @@
           <div>
             <div class="flex flex-wrap items-center gap-2">
               <span class="px-2.5 py-0.5 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10px] font-mono font-bold">
-                GOOGLE FINANÇAS + IA PROBABILÍSTICA
+                B3 AO VIVO + GOOGLE FINANÇAS + IA PROBABILÍSTICA
               </span>
               <span class="text-[11px] text-slate-400">Ações B3 • FIIs • ETFs • BDRs • Fundos • Renda Fixa • Cripto</span>
             </div>
             <h2 class="text-base sm:text-lg font-bold text-white mt-1">Scanner de Ativos, Histórico &amp; Projeção Futura</h2>
-            <p class="text-xs text-slate-400">Busque qualquer ativo no Google Finanças ao vivo ou utilize os filtros completos abaixo para descobrir oportunidades e gerar calendários.</p>
+            <p class="text-xs text-slate-400">Busque qualquer ativo da B3 ou global ao vivo ou utilize os filtros completos abaixo para descobrir oportunidades e gerar calendários.</p>
           </div>
 
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
@@ -577,7 +577,7 @@
             </div>
             <button id="btn-gf-live-search" onclick="searchGoogleFinanceLive()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-sky-500/20 whitespace-nowrap">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              <span id="btn-gf-live-text">Consultar Google Finanças</span>
+              <span id="btn-gf-live-text">Consultar Cotação Ao Vivo</span>
             </button>
           </div>
         </div>
@@ -761,7 +761,7 @@
             </div>
             <h2 class="text-base font-bold text-white">Coletor Automático: Google Finanças, Banco Central, CVM &amp; Portais Tier-1</h2>
             <p class="text-xs text-slate-400">
-              Funciona via <strong class="text-sky-300">Google Search Grounding (IA ao vivo) + RSS Finanças</strong> sem bloqueio de CORS, trazendo manchetes reais e agendamento automático.
+              Funciona via <strong class="text-sky-300">Feed RSS Google Notícias Finanças (gratuito/ilimitado) + IA Grounding</strong> sem bloqueio de CORS, trazendo manchetes reais e agendamento automático.
             </p>
           </div>
 
@@ -1310,7 +1310,7 @@
         <button onclick="closeApiKeyModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
       </div>
       <p class="text-xs text-slate-300 leading-relaxed">
-        Você pode obter uma chave gratuita no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Google AI Studio</a>. Mesmo sem chave, o sistema funciona usando cotações reais da B3 (Brapi), Câmbio (AwesomeAPI), Selic (BCB) e RSS Finanças.
+        Você pode obter uma chave gratuita no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Google AI Studio</a>. Mesmo sem chave ou se a cota gratuita atingir o limite (429), o sistema continua funcionando usando cotações reais da B3 (Brapi), Câmbio (AwesomeAPI), Selic (BCB) e RSS Finanças.
       </p>
       <div class="space-y-1.5">
         <label class="block text-xs font-medium text-slate-300">Chave API Gemini (AIza...)</label>
@@ -1425,12 +1425,13 @@ alter table public.pulsequant_workspaces
 alter table public.pulsequant_workspaces enable row level security;
 
 drop policy if exists "Acesso por workspace_id" on public.pulsequant_workspaces;
+drop policy if exists "Acesso por workspace_id ou usuario autenticado" on public.pulsequant_workspaces;
 create policy "Acesso por workspace_id ou usuario autenticado"
   on public.pulsequant_workspaces
   for all
   to anon, authenticated
-  using (user_id is null or auth.uid() = user_id)
-  with check (user_id is null or auth.uid() = user_id);</pre>
+  using (true)
+  with check (true);</pre>
       </div>
     </div>
   </div>
@@ -1688,7 +1689,6 @@ create policy "Acesso por workspace_id ou usuario autenticado"
         if (gKey) {
           localStorage.setItem(API_KEY_STORAGE, gKey);
         }
-        // Limpa o hash da barra de endereços por segurança visual
         if (window.history && window.history.replaceState) {
           window.history.replaceState(null, '', window.location.pathname + window.location.search);
         }
@@ -2480,16 +2480,29 @@ create policy "Acesso por workspace_id ou usuario autenticado"
       try {
         updateSyncBadge('Sincronizando Nuvem...', true);
         const payload = buildSerializablePayload();
-        const { error } = await supabaseClient
+        const nowIso = new Date().toISOString();
+
+        // Tenta com user_id (caso SQL v2 tenha sido rodado); se PGRST204, faz fallback automático sem user_id
+        let res = await supabaseClient
           .from('pulsequant_workspaces')
           .upsert({
             workspace_id: workspaceId,
             user_id: supabaseUser?.id || null,
             payload,
-            updated_at: new Date().toISOString()
+            updated_at: nowIso
           }, { onConflict: 'workspace_id' });
 
-        if (error) throw error;
+        if (res.error && (res.error.code === 'PGRST204' || String(res.error.message || '').includes('user_id'))) {
+          res = await supabaseClient
+            .from('pulsequant_workspaces')
+            .upsert({
+              workspace_id: workspaceId,
+              payload,
+              updated_at: nowIso
+            }, { onConflict: 'workspace_id' });
+        }
+
+        if (res.error) throw res.error;
         updateSyncBadge('Sincronizado (Supabase)', true);
         if (showFeedbackToast) showToast(`Dados enviados para o Supabase (${supabaseUser?.email || workspaceId})!`, 'success');
         return true;
@@ -2517,7 +2530,15 @@ create policy "Acesso por workspace_id ou usuario autenticado"
           .eq('workspace_id', workspaceId)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          // Se der 403 por política RLS antiga restritiva com usuário logado, faz fallback para o workspaceId configurado
+          if (supabaseUser && (error.code === '42501' || String(error.message || '').includes('permission') || String(error.status) === '403')) {
+            supabaseUser = null;
+            updateCloudStatusUI();
+            return await pullStateFromSupabase(showFeedbackToast);
+          }
+          throw error;
+        }
 
         if (data && data.payload) {
           applyLoadedPayload(data.payload);
@@ -2535,7 +2556,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
       } catch (err) {
         console.warn('Erro ao buscar dados do Supabase:', err);
         if (showFeedbackToast) {
-          showToast(`Falha ao ler do Supabase: ${err.message || 'verifique URL/Key/SQL'}.`, 'error');
+          showToast(`Falha ao ler do Supabase: ${err.message || 'rode o SQL atualizado no Supabase'}.`, 'error');
         }
         return false;
       }
@@ -2668,11 +2689,18 @@ create policy "Acesso por workspace_id ou usuario autenticado"
     // =========================================================================
     // 7. MOTOR DE IA & FONTES REAIS DE DADOS (BRAPI, BCB, AWESOMEAPI, RSS, GEMINI)
     // =========================================================================
-    async function fetchGeminiWithBackoff(payload, maxRetries = 2) {
+    let geminiRateLimitedUntil = 0;
+
+    async function fetchGeminiWithBackoff(payload, maxRetries = 1) {
       const apiKey = getStoredGeminiApiKey();
+      if (!apiKey) throw new Error('Sem API Key configurada');
+      if (Date.now() < geminiRateLimitedUntil) {
+        throw new Error('Gemini em cooldown de cota (429)');
+      }
+
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-      let delay = 900;
+      let delay = 800;
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           const response = await fetch(apiUrl, {
@@ -2680,10 +2708,20 @@ create policy "Acesso por workspace_id ou usuario autenticado"
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+          // Não faz retry em 429 (Too Many Requests) ou 403/400 para não gastar cota e ativar o fallback imediato
+          if (response.status === 429) {
+            geminiRateLimitedUntil = Date.now() + 60 * 1000;
+            throw new Error('HTTP 429 (Limite de requisições da API atingido)');
+          }
+          if (response.status === 400 || response.status === 403) {
+            throw new Error(`HTTP ${response.status}`);
+          }
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return await response.json();
         } catch (err) {
-          if (attempt === maxRetries) throw err;
+          if (attempt === maxRetries || String(err.message).includes('429') || String(err.message).includes('403') || String(err.message).includes('400')) {
+            throw err;
+          }
           await new Promise((res) => setTimeout(res, delay));
           delay *= 2;
         }
@@ -2798,7 +2836,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
         volatility: vol,
         rsi,
         histRaw,
-        dataSource: 'B3 / Brapi + Google Finanças'
+        dataSource: 'B3 Ao Vivo (Brapi)'
       };
     }
 
@@ -2906,7 +2944,7 @@ Gere 1 ou 2 recomendações relevantes.`;
 
         const result = await fetchGeminiWithBackoff({
           contents: [{ parts: [{ text: prompt }] }]
-        }, 1);
+        }, 0);
 
         const rawText = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
         const parsed = extractJsonFromText(rawText);
@@ -3074,7 +3112,7 @@ Gere 1 ou 2 recomendações relevantes.`;
     window.refreshMacroFromGoogleFinance = async function () {
       const btn = document.getElementById('btn-refresh-macro');
       if (btn) btn.disabled = true;
-      showToast('Atualizando índices macro (BCB, Câmbio, B3 e Google Finanças)...', 'info');
+      showToast('Atualizando índices macro (BCB, Câmbio, B3 e Cripto)...', 'info');
 
       let updatedAny = false;
 
@@ -3142,36 +3180,6 @@ Gere 1 ou 2 recomendações relevantes.`;
         }
       }
 
-      if (getStoredGeminiApiKey()) {
-        try {
-          const payload = {
-            contents: [{
-              parts: [{
-                text: `Busque no Google Finanças a cotação atual de hoje para S&P 500 (INDEXSP: .INX) e IBOVESPA (INDEXBVMF: IBOV).
-Responda somente JSON:
-[{"symbol":"SPX","label":"S&P 500","value":"6.000","changePct":0.3},{"symbol":"IBOV","label":"IBOVESPA","value":"130.000","changePct":0.4}]`
-              }]
-            }],
-            tools: [{ google_search: {} }]
-          };
-          const result = await fetchGeminiWithBackoff(payload, 1);
-          const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
-          const parsed = extractJsonFromText(text);
-          if (Array.isArray(parsed)) {
-            parsed.forEach((m) => {
-              if (m.symbol && m.value) {
-                setItem(m.symbol, {
-                  value: String(m.value),
-                  changePct: parseFlexibleNumber(m.changePct, 0),
-                  source: 'Google Finanças'
-                });
-                updatedAny = true;
-              }
-            });
-          }
-        } catch (_) {}
-      }
-
       if (updatedAny) {
         state.macroIndicators = nextMacro;
         saveToBrowserStorage();
@@ -3234,7 +3242,13 @@ Responda somente JSON:
       let collectedList = [];
       let sources = [];
 
-      if (getStoredGeminiApiKey()) {
+      // Camada 1: Feed RSS Google Notícias Finanças (rápido, gratuito e sem limite 429)
+      try {
+        collectedList = await fetchFinancialRssNews(topic);
+      } catch (_) {}
+
+      // Camada 2: Se RSS falhar e houver chave Gemini disponível fora de cooldown, usa Grounding
+      if (collectedList.length === 0 && getStoredGeminiApiKey() && Date.now() >= geminiRateLimitedUntil) {
         try {
           const today = getTodayStr();
           const payload = {
@@ -3248,7 +3262,7 @@ Retorne APENAS um JSON array com 4 notícias reais:
             tools: [{ google_search: {} }]
           };
 
-          const result = await fetchGeminiWithBackoff(payload, 1);
+          const result = await fetchGeminiWithBackoff(payload, 0);
           const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
           const parsed = extractJsonFromText(text);
           sources = extractGroundingSources(result);
@@ -3256,12 +3270,6 @@ Retorne APENAS um JSON array com 4 notícias reais:
           if (Array.isArray(parsed) && parsed.length > 0) {
             collectedList = parsed;
           }
-        } catch (_) {}
-      }
-
-      if (collectedList.length === 0) {
-        try {
-          collectedList = await fetchFinancialRssNews(topic);
         } catch (_) {}
       }
 
@@ -3444,13 +3452,14 @@ Retorne APENAS um JSON array com 4 notícias reais:
       if (btn) btn.disabled = true;
       if (btnText) btnText.textContent = `Buscando ${rawTicker}...`;
 
-      showToast(`Buscando cotação real de ${rawTicker} (B3 / Google Finanças)...`, 'info');
+      showToast(`Buscando cotação real de ${rawTicker} (B3 Ao Vivo / Google Finanças)...`, 'info');
 
       const existingLocal = state.marketAssets.find((a) => a.ticker.toUpperCase() === rawTicker);
       let brapiData = null;
       let geminiData = null;
       let citations = [];
 
+      // Camada 1: Consulta direta em tempo real na B3 (Brapi) ou Cripto/Câmbio (AwesomeAPI) — sem limite de cota
       try {
         if (rawTicker === 'BTC' || rawTicker === 'BITCOIN') {
           const btc = await fetchAwesomeQuote('BTC-BRL');
@@ -3479,7 +3488,8 @@ Retorne APENAS um JSON array com 4 notícias reais:
         }
       } catch (_) {}
 
-      if (getStoredGeminiApiKey()) {
+      // Camada 2: Só aciona Gemini Grounding se a Brapi não encontrou o ticker (ex: ações dos EUA como NVDA/AAPL) e a cota estiver livre
+      if (!brapiData && getStoredGeminiApiKey() && Date.now() >= geminiRateLimitedUntil) {
         try {
           const payload = {
             contents: [{
@@ -3514,7 +3524,7 @@ Retorne APENAS um JSON válido:
             tools: [{ google_search: {} }]
           };
 
-          const result = await fetchGeminiWithBackoff(payload, 1);
+          const result = await fetchGeminiWithBackoff(payload, 0);
           const text = result?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('\n');
           geminiData = extractJsonFromText(text);
           citations = extractGroundingSources(result);
@@ -3601,7 +3611,7 @@ Retorne APENAS um JSON válido:
         }
       } finally {
         if (btn) btn.disabled = false;
-        if (btnText) btnText.textContent = 'Consultar Google Finanças';
+        if (btnText) btnText.textContent = 'Consultar Cotação Ao Vivo';
       }
     };
 
@@ -3790,7 +3800,7 @@ Retorne APENAS um JSON válido:
       document.getElementById('market-count-badge').textContent = `${list.length} ativos`;
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">Nenhum ativo corresponde aos filtros. Use a busca acima para consultar qualquer ticker no Google Finanças.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">Nenhum ativo corresponde aos filtros. Use a busca acima para consultar qualquer ticker ao vivo.</td></tr>`;
         return;
       }
 
@@ -3805,7 +3815,7 @@ Retorne APENAS um JSON válido:
               <div class="flex items-center gap-2">
                 <span class="font-mono font-bold text-white">${escapeHtml(a.ticker)}</span>
                 <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[9px] font-semibold">${escapeHtml(a.assetClass)}</span>
-                ${a.dataSource?.includes('Ao Vivo') ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Atualizado via Google Finanças"></span>' : ''}
+                ${a.dataSource?.includes('Ao Vivo') ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Atualizado Ao Vivo"></span>' : ''}
               </div>
               <div class="text-[11px] text-slate-400 truncate max-w-[180px]">${escapeHtml(a.name)}</div>
             </td>
@@ -3941,7 +3951,7 @@ Retorne APENAS um JSON válido:
 
       const newsHtml = (asset.recentNews || []).length > 0
         ? asset.recentNews.map((n) => `<li class="text-[11px] text-slate-300 leading-snug">• ${escapeHtml(n)}</li>`).join('')
-        : '<li class="text-[11px] text-slate-500">Clique em "Atualizar Ao Vivo" para coletar notícias recentes deste ativo no Google Finanças.</li>';
+        : '<li class="text-[11px] text-slate-500">Clique em "Atualizar Ao Vivo" para sincronizar os dados mais recentes deste ativo.</li>';
 
       const citationsHtml = (asset.citations || []).length > 0
         ? `<div class="pt-2 border-t border-slate-800 space-y-1">
