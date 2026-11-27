@@ -760,9 +760,9 @@
               </span>
               <span id="auto-collect-status-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono border bg-slate-800 text-slate-300 border-slate-700">Modo Manual</span>
             </div>
-            <h2 class="text-base font-bold text-white">Coletor Automático: Google Finanças, Banco Central, CVM &amp; Portais Tier-1</h2>
+            <h2 class="text-base font-bold text-white">Coletor Automático: Google Notícias Finanças BR, InfoMoney &amp; IA Grounding</h2>
             <p class="text-xs text-slate-400">
-              Funciona via <strong class="text-sky-300">Feed RSS Google Notícias Finanças (gratuito/ilimitado) + IA Grounding</strong> sem bloqueio de CORS, trazendo manchetes reais e agendamento automático.
+              Busca manchetes reais de hoje via <strong class="text-sky-300">leitor XML multi-proxy (Google News + InfoMoney) + IA Grounding</strong> sem bloqueio de CORS, com agendamento automático.
             </p>
           </div>
 
@@ -1311,7 +1311,7 @@
         <button onclick="closeApiKeyModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
       </div>
       <p class="text-xs text-slate-300 leading-relaxed">
-        Você pode obter uma chave gratuita no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Google AI Studio</a>. Mesmo sem chave ou se a cota gratuita atingir o limite (429), o sistema continua funcionando usando cotações reais da B3 (Brapi), Câmbio (AwesomeAPI), Selic (BCB) e RSS Finanças.
+        Você pode obter uma chave gratuita no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Google AI Studio</a>. Mesmo sem chave ou se a cota gratuita atingir o limite (429), o sistema continua funcionando usando cotações reais da B3 (Brapi), Câmbio (AwesomeAPI), Selic (BCB) e feeds XML de notícias financeiras.
       </p>
       <div class="space-y-1.5">
         <label class="block text-xs font-medium text-slate-300">Chave API Gemini (AIza...)</label>
@@ -1472,6 +1472,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
     const SUPABASE_CFG_STORAGE = 'pulsequant_supabase_cfg_v1';
 
     let supabaseClient = null;
+    let supabaseClientCacheKey = '';
     let supabaseUser = null;
     let cloudSyncDebounceTimer = null;
 
@@ -1493,6 +1494,8 @@ create policy "Acesso por workspace_id ou usuario autenticado"
     let assetProjectionChartInstance = null;
     let portfolioAllocChartInstance = null;
     let autoCollectTimerId = null;
+    let autoCollectCountdownId = null;
+    let nextAutoCollectAt = null;
 
     const nowDateObj = new Date();
     const state = {
@@ -2309,7 +2312,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
     }
 
     // =========================================================================
-    // 6. PERSISTÊNCIA LOCAL + SINCRONIZAÇÃO EM NUVEM (SUPABASE)
+    // 6. PERSISTÊNCIA LOCAL + SINCRONIZAÇÃO EM NUVEM (SUPABASE - SINGLETON)
     // =========================================================================
     function getSupabaseConfig() {
       try {
@@ -2329,14 +2332,28 @@ create policy "Acesso por workspace_id ou usuario autenticado"
     function initSupabaseClient() {
       const cfg = getSupabaseConfig();
       if (cfg.url && cfg.anonKey && window.supabase && typeof window.supabase.createClient === 'function') {
+        const cacheKey = `${cfg.url}::${cfg.anonKey}`;
+        if (supabaseClient && supabaseClientCacheKey === cacheKey) {
+          updateCloudStatusUI();
+          return;
+        }
         try {
-          supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+          supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey, {
+            auth: {
+              persistSession: true,
+              autoRefreshToken: true,
+              storageKey: 'pulsequant-sb-auth'
+            }
+          });
+          supabaseClientCacheKey = cacheKey;
         } catch (err) {
           console.warn('Falha ao inicializar Supabase:', err);
           supabaseClient = null;
+          supabaseClientCacheKey = '';
         }
       } else {
         supabaseClient = null;
+        supabaseClientCacheKey = '';
         supabaseUser = null;
       }
       updateCloudStatusUI();
@@ -2609,6 +2626,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
     window.disconnectSupabase = function () {
       try { localStorage.removeItem(SUPABASE_CFG_STORAGE); } catch (_) {}
       supabaseClient = null;
+      supabaseClientCacheKey = '';
       supabaseUser = null;
       const urlEl = document.getElementById('sb-url-input');
       const keyEl = document.getElementById('sb-key-input');
@@ -2694,7 +2712,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
     }
 
     // =========================================================================
-    // 7. MOTOR DE IA & FONTES REAIS DE DADOS (BRAPI, BCB, AWESOMEAPI, RSS, GEMINI)
+    // 7. MOTOR DE IA & FONTES REAIS DE DADOS (BRAPI, BCB, AWESOMEAPI, RSS XML)
     // =========================================================================
     let geminiRateLimitedUntil = 0;
 
@@ -3092,7 +3110,7 @@ Gere 1 ou 2 recomendações relevantes.`;
     }
 
     // =========================================================================
-    // 7B. COLETA AUTOMÁTICA DE NOTÍCIAS & GOOGLE FINANÇAS (MULTI-CAMADA REAL)
+    // 7B. COLETA AUTOMÁTICA DE NOTÍCIAS (LEITOR XML MULTI-PROXY + GEMINI)
     // =========================================================================
     function renderMacroTickerStrip() {
       const strip = document.getElementById('macro-ticker-strip');
@@ -3198,42 +3216,110 @@ Gere 1 ou 2 recomendações relevantes.`;
       if (btn) btn.disabled = false;
     };
 
-    async function fetchFinancialRssNews(topicQuery) {
-      const q = encodeURIComponent(`${topicQuery} mercado financeiro`);
-      const rssUrl = `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
-      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-      const res = await fetch(apiUrl);
-      if (!res.ok) throw new Error('RSS indisponível');
-      const data = await res.json();
-      if (!Array.isArray(data.items) || data.items.length === 0) throw new Error('RSS vazio');
+    function classifyNewsCredibility(sourceName) {
+      const lowerSrc = String(sourceName || '').toLowerCase();
+      if (lowerSrc.includes('banco central') || lowerSrc.includes('cvm') || lowerSrc.includes('gov.br') || lowerSrc.includes('tesouro')) {
+        return 'official';
+      }
+      if (
+        lowerSrc.includes('valor') || lowerSrc.includes('infomoney') || lowerSrc.includes('reuters') ||
+        lowerSrc.includes('bloomberg') || lowerSrc.includes('exame') || lowerSrc.includes('estadão') ||
+        lowerSrc.includes('estadao') || lowerSrc.includes('folha') || lowerSrc.includes('cnn') ||
+        lowerSrc.includes('g1') || lowerSrc.includes('broadcast') || lowerSrc.includes('money times')
+      ) {
+        return 'tier1';
+      }
+      return 'general';
+    }
 
-      return data.items.slice(0, 5).map((item) => {
-        const rawTitle = (item.title || '').trim();
-        const parts = rawTitle.split(' - ');
-        const source = parts.length > 1 ? parts.pop().trim() : 'Google Notícias Finanças';
-        const title = parts.join(' - ').trim() || rawTitle;
-        const cleanDesc = (item.description || '')
+    function parseXmlRssItems(xmlString, defaultSource = 'Google Finanças') {
+      if (!xmlString || typeof xmlString !== 'string') return [];
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xmlString, 'text/xml');
+      const items = Array.from(doc.querySelectorAll('item'));
+      return items.slice(0, 8).map((node) => {
+        const rawTitle = (node.querySelector('title')?.textContent || '').trim();
+        const link = (node.querySelector('link')?.textContent || '').trim() || 'https://www.google.com/finance';
+        const rawDesc = (node.querySelector('description')?.textContent || '').trim();
+        const sourceTag = (node.querySelector('source')?.textContent || '').trim();
+
+        let title = rawTitle;
+        let source = sourceTag || defaultSource;
+        if (!sourceTag && rawTitle.includes(' - ')) {
+          const parts = rawTitle.split(' - ');
+          source = parts.pop().trim() || defaultSource;
+          title = parts.join(' - ').trim();
+        }
+
+        const cleanDesc = rawDesc
           .replace(/<[^>]+>/g, ' ')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
           .replace(/\s+/g, ' ')
           .trim();
 
-        const lowerSrc = source.toLowerCase();
-        const credKey = (lowerSrc.includes('banco central') || lowerSrc.includes('cvm') || lowerSrc.includes('gov.br'))
-          ? 'official'
-          : (lowerSrc.includes('valor') || lowerSrc.includes('infomoney') || lowerSrc.includes('reuters') || lowerSrc.includes('bloomberg') || lowerSrc.includes('exame') || lowerSrc.includes('estadão') || lowerSrc.includes('folha'))
-            ? 'tier1'
-            : 'general';
-
         return {
           source,
-          credibilityKey: credKey,
-          url: item.link || 'https://www.google.com/finance',
+          credibilityKey: classifyNewsCredibility(source),
+          url: link,
           title,
-          content: cleanDesc && cleanDesc.length > 35
+          content: cleanDesc && cleanDesc.length > 35 && !cleanDesc.toLowerCase().startsWith(title.toLowerCase().slice(0, 25))
             ? cleanDesc
-            : `Manchete coletada em tempo real via Google Notícias Finanças (${source}). Clique em "Analisar com IA" para avaliar o impacto probabilístico nos ativos relacionados.`
+            : `Notícia coletada em tempo real via ${source}. Clique em "Analisar com IA" para calcular o impacto probabilístico e gerar o calendário de entrada/saída.`
         };
-      });
+      }).filter((it) => it.title && it.title.length > 10);
+    }
+
+    async function fetchXmlViaMultiProxy(feedUrl, defaultSource) {
+      const proxies = [
+        async () => {
+          const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
+          if (!r.ok) throw new Error('allorigins failed');
+          const j = await r.json();
+          return j?.contents || '';
+        },
+        async () => {
+          const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(feedUrl)}`);
+          if (!r.ok) throw new Error('corsproxy failed');
+          return await r.text();
+        },
+        async () => {
+          const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(feedUrl)}`);
+          if (!r.ok) throw new Error('codetabs failed');
+          return await r.text();
+        }
+      ];
+
+      for (const tryProxy of proxies) {
+        try {
+          const xmlText = await tryProxy();
+          const parsed = parseXmlRssItems(xmlText, defaultSource);
+          if (parsed.length > 0) return parsed;
+        } catch (_) {}
+      }
+      return [];
+    }
+
+    async function fetchFinancialRssNews(topicQuery) {
+      const q = encodeURIComponent(`${topicQuery}`);
+      const googleNewsUrl = `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+      const infoMoneyUrl = 'https://www.infomoney.com.br/feed/';
+
+      const [gnRes, imRes] = await Promise.allSettled([
+        fetchXmlViaMultiProxy(googleNewsUrl, 'Google Notícias Finanças'),
+        fetchXmlViaMultiProxy(infoMoneyUrl, 'InfoMoney')
+      ]);
+
+      const combined = [];
+      if (gnRes.status === 'fulfilled' && Array.isArray(gnRes.value)) {
+        combined.push(...gnRes.value.slice(0, 5));
+      }
+      if (imRes.status === 'fulfilled' && Array.isArray(imRes.value)) {
+        combined.push(...imRes.value.slice(0, 3));
+      }
+      return combined;
     }
 
     window.collectRealTimeNews = async function (autoAnalyzeTop1 = false) {
@@ -3248,10 +3334,12 @@ Gere 1 ou 2 recomendações relevantes.`;
       let collectedList = [];
       let sources = [];
 
+      // Camada 1: Leitor XML multi-proxy (Google Notícias Finanças BR + InfoMoney)
       try {
         collectedList = await fetchFinancialRssNews(topic);
       } catch (_) {}
 
+      // Camada 2: Complementa com Gemini + Google Search se disponível e fora do cooldown 429
       if (collectedList.length === 0 && getStoredGeminiApiKey() && Date.now() >= geminiRateLimitedUntil) {
         try {
           const today = getTodayStr();
@@ -3321,7 +3409,7 @@ Retorne APENAS um JSON array com 4 notícias reais:
           showToast('Feed já está atualizado com as manchetes mais recentes.', 'info');
         }
       } catch (err) {
-        showToast('Não foi possível acessar as notícias externas neste momento. Você pode colar uma notícia manualmente ao lado.', 'warning');
+        showToast('Não foi possível acessar as notícias externas neste momento. Verifique sua conexão ou cole uma notícia manualmente.', 'warning');
       } finally {
         if (btn) btn.disabled = false;
         if (btnText) btnText.textContent = 'Coletar Notícias Agora';
@@ -3343,7 +3431,8 @@ Retorne APENAS um JSON array com 4 notícias reais:
       updateAutoCollectStatusPill();
 
       if (mins > 0) {
-        showToast(`Coleta automática ativada a cada ${mins} minutos!`, 'success');
+        showToast(`Auto-Sync ativado (${mins} min)! Executando primeira coleta agora...`, 'success');
+        collectRealTimeNews(false);
       } else {
         showToast('Coleta automática alterada para modo manual.', 'info');
       }
@@ -3354,11 +3443,25 @@ Retorne APENAS um JSON array com 4 notícias reais:
         clearInterval(autoCollectTimerId);
         autoCollectTimerId = null;
       }
+      if (autoCollectCountdownId) {
+        clearInterval(autoCollectCountdownId);
+        autoCollectCountdownId = null;
+      }
+      nextAutoCollectAt = null;
+
       const mins = Number(state.autoCollect.intervalMinutes || 0);
       if (mins > 0) {
+        const intervalMs = mins * 60 * 1000;
+        nextAutoCollectAt = Date.now() + intervalMs;
+
         autoCollectTimerId = setInterval(() => {
+          nextAutoCollectAt = Date.now() + intervalMs;
           collectRealTimeNews(false);
-        }, mins * 60 * 1000);
+        }, intervalMs);
+
+        autoCollectCountdownId = setInterval(() => {
+          updateAutoCollectStatusPill();
+        }, 15000);
       }
     }
 
@@ -3376,8 +3479,15 @@ Retorne APENAS um JSON array com 4 notícias reais:
         : '';
 
       if (mins > 0) {
+        let nextStr = '';
+        if (nextAutoCollectAt) {
+          const secsLeft = Math.max(0, Math.round((nextAutoCollectAt - Date.now()) / 1000));
+          const mLeft = Math.floor(secsLeft / 60);
+          const sLeft = String(secsLeft % 60).padStart(2, '0');
+          nextStr = ` • Próx: ${mLeft}:${sLeft}`;
+        }
         pill.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-mono border bg-emerald-500/15 text-emerald-300 border-emerald-500/40';
-        pill.textContent = `Auto-Sync ON (${mins}m)${lastStr}`;
+        pill.textContent = `Auto-Sync ON (${mins}m)${nextStr}${lastStr}`;
       } else {
         pill.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-mono border bg-slate-800 text-slate-300 border-slate-700';
         pill.textContent = `Modo Manual${lastStr}`;
