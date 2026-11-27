@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PulseQuant — Análise de Mercado, Calendário de Risco & Investimentos</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310b981'/%3E%3Cpath d='M6 22l7-7 5 5 8-10' stroke='%23090d16' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1407,7 +1408,7 @@
 
       <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-emerald-400">Passo 1: Cole este SQL no "SQL Editor" do Supabase e clique em Run</span>
+          <span class="text-xs font-bold text-emerald-400">Passo 1: Cole este SQL completo no "SQL Editor" do Supabase e clique em Run</span>
           <button onclick="copySupabaseSql()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-mono text-slate-200 border border-slate-700 transition">
             Copiar SQL
           </button>
@@ -1421,6 +1422,9 @@
 
 alter table public.pulsequant_workspaces
   add column if not exists user_id uuid references auth.users(id) on delete set null;
+
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on table public.pulsequant_workspaces to anon, authenticated;
 
 alter table public.pulsequant_workspaces enable row level security;
 
@@ -2482,7 +2486,6 @@ create policy "Acesso por workspace_id ou usuario autenticado"
         const payload = buildSerializablePayload();
         const nowIso = new Date().toISOString();
 
-        // Tenta com user_id (caso SQL v2 tenha sido rodado); se PGRST204, faz fallback automático sem user_id
         let res = await supabaseClient
           .from('pulsequant_workspaces')
           .upsert({
@@ -2508,9 +2511,15 @@ create policy "Acesso por workspace_id ou usuario autenticado"
         return true;
       } catch (err) {
         console.warn('Erro ao sincronizar com Supabase:', err);
-        updateSyncBadge('Salvo Local (Erro Nuvem)', false);
+        updateSyncBadge('Salvo Local (Permissão SQL)', false);
         if (showFeedbackToast) {
-          showToast(`Falha ao enviar ao Supabase: ${err.message || 'verifique tabela e RLS'}.`, 'error');
+          const isPerm = err?.code === '42501' || String(err?.message || '').includes('permission denied');
+          showToast(
+            isPerm
+              ? 'Permissão negada no Supabase (42501). Copie o SQL atualizado no modal do Supabase e execute no SQL Editor!'
+              : `Falha ao enviar ao Supabase: ${err.message || 'verifique tabela e permissões'}.`,
+            'error'
+          );
         }
         return false;
       }
@@ -2530,15 +2539,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
           .eq('workspace_id', workspaceId)
           .maybeSingle();
 
-        if (error) {
-          // Se der 403 por política RLS antiga restritiva com usuário logado, faz fallback para o workspaceId configurado
-          if (supabaseUser && (error.code === '42501' || String(error.message || '').includes('permission') || String(error.status) === '403')) {
-            supabaseUser = null;
-            updateCloudStatusUI();
-            return await pullStateFromSupabase(showFeedbackToast);
-          }
-          throw error;
-        }
+        if (error) throw error;
 
         if (data && data.payload) {
           applyLoadedPayload(data.payload);
@@ -2556,7 +2557,13 @@ create policy "Acesso por workspace_id ou usuario autenticado"
       } catch (err) {
         console.warn('Erro ao buscar dados do Supabase:', err);
         if (showFeedbackToast) {
-          showToast(`Falha ao ler do Supabase: ${err.message || 'rode o SQL atualizado no Supabase'}.`, 'error');
+          const isPerm = err?.code === '42501' || String(err?.message || '').includes('permission denied');
+          showToast(
+            isPerm
+              ? 'Permissão negada no Supabase (42501). Rode o SQL atualizado (com GRANT) no SQL Editor do Supabase!'
+              : `Falha ao ler do Supabase: ${err.message || 'rode o SQL no Supabase'}.`,
+            'error'
+          );
         }
         return false;
       }
@@ -2620,7 +2627,7 @@ create policy "Acesso por workspace_id ou usuario autenticado"
       ta.select();
       try {
         document.execCommand('copy');
-        showToast('Script SQL copiado! Cole no SQL Editor do Supabase e clique em Run.', 'success');
+        showToast('Script SQL (com GRANT) copiado! Cole no SQL Editor do Supabase e clique em Run.', 'success');
       } catch (_) {
         showToast('Não foi possível copiar automaticamente. Selecione o texto SQL e copie.', 'warning');
       }
@@ -2708,7 +2715,6 @@ create policy "Acesso por workspace_id ou usuario autenticado"
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-          // Não faz retry em 429 (Too Many Requests) ou 403/400 para não gastar cota e ativar o fallback imediato
           if (response.status === 429) {
             geminiRateLimitedUntil = Date.now() + 60 * 1000;
             throw new Error('HTTP 429 (Limite de requisições da API atingido)');
@@ -3242,12 +3248,10 @@ Gere 1 ou 2 recomendações relevantes.`;
       let collectedList = [];
       let sources = [];
 
-      // Camada 1: Feed RSS Google Notícias Finanças (rápido, gratuito e sem limite 429)
       try {
         collectedList = await fetchFinancialRssNews(topic);
       } catch (_) {}
 
-      // Camada 2: Se RSS falhar e houver chave Gemini disponível fora de cooldown, usa Grounding
       if (collectedList.length === 0 && getStoredGeminiApiKey() && Date.now() >= geminiRateLimitedUntil) {
         try {
           const today = getTodayStr();
@@ -3459,7 +3463,6 @@ Retorne APENAS um JSON array com 4 notícias reais:
       let geminiData = null;
       let citations = [];
 
-      // Camada 1: Consulta direta em tempo real na B3 (Brapi) ou Cripto/Câmbio (AwesomeAPI) — sem limite de cota
       try {
         if (rawTicker === 'BTC' || rawTicker === 'BITCOIN') {
           const btc = await fetchAwesomeQuote('BTC-BRL');
@@ -3488,7 +3491,6 @@ Retorne APENAS um JSON array com 4 notícias reais:
         }
       } catch (_) {}
 
-      // Camada 2: Só aciona Gemini Grounding se a Brapi não encontrou o ticker (ex: ações dos EUA como NVDA/AAPL) e a cota estiver livre
       if (!brapiData && getStoredGeminiApiKey() && Date.now() >= geminiRateLimitedUntil) {
         try {
           const payload = {
