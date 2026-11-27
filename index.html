@@ -151,7 +151,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
             <span id="alerts-badge-count" class="hidden absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-mono text-[9px] font-extrabold">0</span>
           </button>
-          <button onclick="openCloudModal()" id="btn-cloud-status" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px] transition" title="Conta, Autenticação e Banco de Dados Supabase">
+          <button onclick="openCloudModal()" id="btn-cloud-status" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px] transition" title="Conta, Autenticação, Link Rápido e Banco de Dados Supabase">
             <span id="cloud-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
             <span class="hidden sm:inline" id="cloud-label">Supabase</span>
           </button>
@@ -294,7 +294,6 @@
       <!-- PAINEL DO CALENDÁRIO DINÂMICO DE RISCO & COMPARATIVO DE COMPRA      -->
       <!-- =================================================================== -->
       <div id="asset-calendar-panel" class="glass-panel border border-emerald-500/30 rounded-2xl p-5 space-y-5 shadow-xl shadow-emerald-950/20">
-        <!-- Cabeçalho do Calendário -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div class="space-y-1">
             <div class="flex flex-wrap items-center gap-2">
@@ -320,11 +319,8 @@
           </div>
         </div>
 
-        <!-- Corpo do Calendário: Grade Mensal + Painel Comparativo Lateral -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <!-- Coluna Esquerda: Calendário Visual Interativo -->
           <div class="lg:col-span-7 space-y-3">
-            <!-- Controles de Mês -->
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <button onclick="shiftCalendarMonth(-1)" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition" title="Mês anterior">
@@ -340,7 +336,6 @@
               </button>
             </div>
 
-            <!-- Dias da Semana -->
             <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-mono uppercase tracking-wider text-slate-400">
               <div class="py-1">Dom</div>
               <div class="py-1">Seg</div>
@@ -351,10 +346,8 @@
               <div class="py-1">Sáb</div>
             </div>
 
-            <!-- Grade de Dias -->
             <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5"></div>
 
-            <!-- Legenda de Cores de Risco Progressivo -->
             <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-slate-300">
               <div class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-emerald-500 border border-emerald-300"></span>
@@ -388,7 +381,6 @@
             <p class="text-[11px] text-slate-400">Dica: Clique em qualquer dia do calendário para marcar rapidamente a data em que você comprou este ativo.</p>
           </div>
 
-          <!-- Coluna Direita: Resumo de Datas + Comparativo da Minha Compra -->
           <div class="lg:col-span-5 flex flex-col justify-between gap-4">
             <div class="space-y-3">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-300">Limites Planejados pelo Modelo</div>
@@ -462,7 +454,6 @@
     <!-- ABA NOVA: CARTEIRA CONSOLIDADA, P&L EM TEMPO REAL & POSITION SIZING   -->
     <!-- ===================================================================== -->
     <section id="tab-portfolio" class="tab-section space-y-6 fade-in hidden">
-      <!-- KPIs da Carteira -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="glass-panel border border-slate-800 rounded-2xl p-5">
           <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Capital Alocado (Aberto)</span>
@@ -486,9 +477,7 @@
         </div>
       </div>
 
-      <!-- Grade: Calculadora de Position Sizing + Gráfico de Alocação -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Calculadora Profissional de Position Sizing & Stop Loss -->
         <div class="lg:col-span-7 glass-panel border border-emerald-500/30 rounded-2xl p-5 space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
             <div>
@@ -523,7 +512,6 @@
           <div id="ps-result-box" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1"></div>
         </div>
 
-        <!-- Gráfico de Alocação por Classe -->
         <div class="lg:col-span-5 glass-panel border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
           <div>
             <h3 class="text-sm font-bold text-white">Alocação por Classe de Ativo</h3>
@@ -536,7 +524,6 @@
         </div>
       </div>
 
-      <!-- Tabela Consolidada de Posições -->
       <div class="glass-panel border border-slate-800 rounded-2xl overflow-hidden">
         <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -570,7 +557,6 @@
     <!-- ABA 2: MERCADO, GOOGLE FINANÇAS, SCANNER & PROJEÇÃO FUTURA            -->
     <!-- ===================================================================== -->
     <section id="tab-market" class="tab-section space-y-6 fade-in hidden">
-      <!-- Barra de Busca Ao Vivo no Google Finanças -->
       <div class="glass-panel border border-sky-500/30 rounded-2xl p-5 space-y-4 shadow-xl shadow-sky-950/15">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
@@ -596,7 +582,6 @@
           </div>
         </div>
 
-        <!-- Filtros Completos do Scanner -->
         <div class="pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
           <input id="market-filter-search" type="text" oninput="renderMarketAssetsList()" placeholder="Filtrar nome ou ticker..." class="bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none" />
 
@@ -651,7 +636,6 @@
         </div>
       </div>
 
-      <!-- Painel Principal do Ativo Selecionado -->
       <div id="selected-asset-analyzer" class="glass-panel border border-slate-800 rounded-2xl p-5 space-y-5">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div class="space-y-1">
@@ -719,7 +703,6 @@
         </div>
       </div>
 
-      <!-- Grade Inferior: Tabela do Scanner de Ativos + Radar de Eventos Econômicos -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-8 glass-panel border border-slate-800 rounded-2xl overflow-hidden">
           <div class="p-4 border-b border-slate-800 flex items-center justify-between">
@@ -810,7 +793,6 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Formulário de Importação Manual / URL -->
         <div class="lg:col-span-5 glass-panel border border-slate-800 rounded-2xl p-5 space-y-4">
           <div class="flex items-center justify-between">
             <div>
@@ -869,7 +851,6 @@
           </button>
         </div>
 
-        <!-- Feed de Canais Oficiais e Bem Avaliados -->
         <div class="lg:col-span-7 glass-panel border border-slate-800 rounded-2xl p-5 flex flex-col">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
@@ -1094,7 +1075,263 @@
   </footer>
 
   <!-- ======================================================================= -->
-  <!-- MODAL 8: CONEXÃO SUPABASE, AUTENTICAÇÃO & DEPLOY GITHUB PAGES           -->
+  <!-- MODAL 1: REGISTRAR / EDITAR MINHA COMPRA & COMPARATIVO                  -->
+  <!-- ======================================================================= -->
+  <div id="trade-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-violet-500/40 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl fade-in max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="inline-block px-2 py-0.5 rounded-md bg-violet-500/15 text-violet-300 border border-violet-500/30 text-[10px] font-mono font-bold mb-1">
+            MINHA OPERAÇÃO &amp; COMPARATIVO
+          </span>
+          <h3 class="text-base font-bold text-white">Indicar Quando Comprei</h3>
+          <p id="trade-modal-subtitle" class="text-xs text-slate-400 mt-0.5">Compare sua data de entrada com a janela verde do sistema</p>
+        </div>
+        <button onclick="closeTradeModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <input type="hidden" id="trade-analysis-id" />
+      <input type="hidden" id="trade-rec-index" />
+
+      <div id="trade-timing-preview" class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs"></div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Data da Compra *</label>
+          <input id="trade-buy-date" type="date" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Preço de Compra (R$ / US$)</label>
+          <input id="trade-buy-price" type="number" step="0.01" placeholder="Ex: 38.50" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Valor Investido (opc.)</label>
+          <input id="trade-amount" type="number" step="0.01" placeholder="Ex: 1000" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Data da Venda (se vendeu)</label>
+          <input id="trade-sell-date" type="date" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Preço de Venda (opc.)</label>
+          <input id="trade-sell-price" type="number" step="0.01" placeholder="Ex: 41.20" oninput="updateTradeTimingPreview()" class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="block text-xs font-medium text-slate-300">Notas da Operação</label>
+        <textarea id="trade-notes" rows="2" placeholder="Ex: Comprei na abertura após confirmação de volume..." class="w-full bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"></textarea>
+      </div>
+
+      <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+        <input id="trade-sync-feedback" type="checkbox" checked class="rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500" />
+        <span>Se preencher preço de compra e venda, atualizar também o Resultado Real (%) na auditoria</span>
+      </label>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+        <button id="btn-delete-trade" type="button" onclick="deleteUserTrade()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition">
+          Remover Compra
+        </button>
+        <div class="flex gap-2 ml-auto">
+          <button type="button" onclick="closeTradeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+          <button type="button" onclick="saveTradeModal()" class="px-4 py-2 rounded-xl bg-violet-500 hover:bg-violet-400 text-xs font-bold text-white transition">Salvar Operação</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 2: AJUSTAR DATAS DO CALENDÁRIO DO ATIVO                           -->
+  <!-- ======================================================================= -->
+  <div id="schedule-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">Ajustar Datas do Calendário</h3>
+          <p id="schedule-modal-subtitle" class="text-xs text-slate-400 mt-0.5">Personalize as datas limite de compra e venda</p>
+        </div>
+        <button onclick="closeScheduleModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <input type="hidden" id="sched-analysis-id" />
+      <input type="hidden" id="sched-rec-index" />
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-emerald-300">Dia 1 (Início Entrada)</label>
+          <input id="sched-buy-start" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-emerald-300">Dia Final Entrada (Verde)</label>
+          <input id="sched-buy-end" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-amber-300">Alvo de Venda / Saque</label>
+          <input id="sched-sell-target" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-rose-300">Limite Máximo de Venda</label>
+          <input id="sched-sell-limit" type="date" class="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeScheduleModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+        <button onclick="saveScheduleModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-bold text-slate-950 transition">Atualizar Calendário</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 3: REGISTRO DE FEEDBACK COMPARATIVO                               -->
+  <!-- ======================================================================= -->
+  <div id="feedback-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">Registrar Feedback Comparativo</h3>
+          <p id="modal-feedback-subtitle" class="text-xs text-slate-400 mt-0.5">Auditoria do resultado real de mercado</p>
+        </div>
+        <button onclick="closeFeedbackModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <input type="hidden" id="modal-analysis-id" />
+      <input type="hidden" id="modal-rec-index" />
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Status da Previsão</label>
+          <select id="modal-status" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+            <option value="Pendente">Pendente</option>
+            <option value="Acertou">Acertou (Direção &amp; Prazo)</option>
+            <option value="Parcial">Parcial (Direção correta, magnitude divergente)</option>
+            <option value="Errou">Errou (Mercado foi contra)</option>
+          </select>
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Variação Real Observada (%)</label>
+          <input id="modal-actual-return" type="number" step="0.01" placeholder="Ex: +4.25 ou -1.80" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="block text-xs font-medium text-slate-300">Anotações de Feedback / Lições Aprendidas</label>
+        <textarea id="modal-notes" rows="3" placeholder="Ex: O movimento aconteceu 2 dias antes do previsto devido à abertura do dólar..." class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeFeedbackModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+        <button onclick="saveFeedbackModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-bold text-slate-950 transition">Salvar Auditoria</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 4: DETALHES DA ANÁLISE                                            -->
+  <!-- ======================================================================= -->
+  <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto fade-in">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span id="detail-badge" class="inline-block px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-semibold mb-1.5"></span>
+          <h3 id="detail-title" class="text-base font-bold text-white"></h3>
+          <p id="detail-meta" class="text-xs text-slate-400 mt-1"></p>
+        </div>
+        <button onclick="closeDetailModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0">✕</button>
+      </div>
+      <div id="detail-body" class="space-y-4 text-xs text-slate-300 leading-relaxed"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 5: CONFIRMAÇÃO PARA RESETAR DADOS DO NAVEGADOR                    -->
+  <!-- ======================================================================= -->
+  <div id="reset-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-rose-500/40 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-in">
+      <h3 class="text-base font-bold text-white">Restaurar Dados Locais do Navegador?</h3>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Isso limpará as análises, compras registradas e feedbacks salvos no <code class="text-amber-300">localStorage</code> e restaurará os dados de demonstração. Recomendamos exportar um backup em JSON antes.
+      </p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+        <button onclick="confirmResetLocalStorage()" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-xs font-bold text-white transition">Sim, Resetar Tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 6: AJUSTAR PREÇO ATUAL DO ATIVO MANUALMENTE                       -->
+  <!-- ======================================================================= -->
+  <div id="price-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-sky-500/40 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">Ajustar Cotação Atual</h3>
+          <p id="price-modal-subtitle" class="text-xs text-slate-400 mt-0.5">---</p>
+        </div>
+        <button onclick="closeQuickPriceModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+      </div>
+      <div class="space-y-3">
+        <div class="space-y-1">
+          <label class="block text-xs font-medium text-slate-300">Preço Atual (R$ / US$)</label>
+          <input id="quick-price-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-sm font-mono text-white outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-slate-300">Variação Hoje (%)</label>
+            <input id="quick-day-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+          </div>
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-slate-300">Dividend Yield (%)</label>
+            <input id="quick-dy-input" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeQuickPriceModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+        <button onclick="saveQuickPriceModal()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-xs font-bold text-slate-950 transition">Aplicar Cotação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 7: CONFIGURAR CHAVE API GEMINI (COM SINCRONIZAÇÃO NA NUVEM)       -->
+  <!-- ======================================================================= -->
+  <div id="apikey-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-[#0f1623] border border-emerald-500/40 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">Configurar Chave API Google Gemini</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Ative a análise por IA e pesquisa ao vivo no Google Finanças</p>
+        </div>
+        <button onclick="closeApiKeyModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Você pode obter uma chave gratuita no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Google AI Studio</a>. Mesmo sem chave, o sistema funciona usando cotações reais da B3 (Brapi), Câmbio (AwesomeAPI), Selic (BCB) e RSS Finanças.
+      </p>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-medium text-slate-300">Chave API Gemini (AIza...)</label>
+        <input id="gemini-apikey-input" type="password" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
+      </div>
+      <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+        <input id="gemini-sync-cloud" type="checkbox" checked class="rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500" />
+        <span>Sincronizar minha chave Gemini na minha conta/workspace Supabase (carrega sozinho em outros dispositivos)</span>
+      </label>
+      <div class="flex items-center justify-between gap-2 pt-2">
+        <button onclick="clearGeminiApiKey()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition">Remover Chave</button>
+        <div class="flex gap-2">
+          <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Cancelar</button>
+          <button onclick="saveGeminiApiKey()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-bold text-slate-950 transition">Salvar Chave</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 8: CONEXÃO SUPABASE, LINK MÁGICO & DEPLOY GITHUB PAGES            -->
   <!-- ======================================================================= -->
   <div id="cloud-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
     <div class="bg-[#0f1623] border border-sky-500/40 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl fade-in max-h-[90vh] overflow-y-auto">
@@ -1103,8 +1340,8 @@
           <span class="inline-block px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10px] font-mono font-bold mb-1">
             HOSPEDAGEM GITHUB PAGES + BANCO &amp; AUTH SUPABASE
           </span>
-          <h3 class="text-base font-bold text-white">Sincronização em Nuvem (Supabase) &amp; Conta Pessoal</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Conecte seu projeto Supabase para sincronizar entre computador e celular via Workspace ID ou Login com E-mail/Senha.</p>
+          <h3 class="text-base font-bold text-white">Sincronização em Nuvem (Supabase) &amp; Acesso Multi-Dispositivo</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Conecte seu projeto Supabase para sincronizar carteira, análises e chave da IA entre computador e celular.</p>
         </div>
         <button onclick="closeCloudModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">✕</button>
       </div>
@@ -1125,6 +1362,17 @@
         <input id="sb-key-input" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none" />
       </div>
 
+      <!-- Link Mágico para abrir no celular ou outro PC sem redigitar chaves -->
+      <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="space-y-0.5">
+          <div class="text-xs font-bold text-emerald-300">Acesso Rápido em Outros Dispositivos (Zero Digitação)</div>
+          <p class="text-[11px] text-slate-300">Gera um link privado com <code class="text-emerald-300">#hash</code> (nunca enviado ao servidor) para abrir no celular já conectado e com sua chave IA.</p>
+        </div>
+        <button onclick="copyMagicAccessLink()" class="shrink-0 px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
+          Copiar Link Rápido
+        </button>
+      </div>
+
       <!-- Seção Opcional: Login com E-mail e Senha (Supabase Auth) -->
       <div class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2.5">
         <div class="flex items-center justify-between">
@@ -1143,13 +1391,13 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2 pt-1">
-        <button onclick="saveSupabaseConfigAndSync()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
+        <button onclick="saveSupabaseConfigAndSync()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
           Conectar &amp; Sincronizar Agora
         </button>
-        <button onclick="pushStateToSupabase(true)" class="px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 font-semibold text-xs transition">
+        <button onclick="pushStateToSupabase(true)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 font-semibold text-xs transition">
           Enviar Local → Nuvem
         </button>
-        <button onclick="pullStateFromSupabase(true)" class="px-3 py-2 rounded-xl bg-violet-500/15 hover:bg-violet-500/25 text-violet-300 border border-violet-500/30 font-semibold text-xs transition">
+        <button onclick="pullStateFromSupabase(true)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-violet-300 border border-slate-700 font-semibold text-xs transition">
           Baixar Nuvem → Local
         </button>
         <button onclick="disconnectSupabase()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition ml-auto">
@@ -1166,27 +1414,23 @@
         </div>
         <pre id="supabase-sql-snippet" class="text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed bg-[#070a12] p-3 rounded-lg border border-slate-800/80">create table if not exists public.pulsequant_workspaces (
   workspace_id text primary key,
+  user_id uuid references auth.users(id) on delete set null,
   payload jsonb not null,
   updated_at timestamptz not null default now()
 );
 
+alter table public.pulsequant_workspaces
+  add column if not exists user_id uuid references auth.users(id) on delete set null;
+
 alter table public.pulsequant_workspaces enable row level security;
 
-create policy "Acesso por workspace_id"
+drop policy if exists "Acesso por workspace_id" on public.pulsequant_workspaces;
+create policy "Acesso por workspace_id ou usuario autenticado"
   on public.pulsequant_workspaces
   for all
   to anon, authenticated
-  using (true)
-  with check (true);</pre>
-      </div>
-
-      <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5 text-xs text-slate-300">
-        <div class="font-bold text-sky-300">Passo 2: Publicar Online Grátis no GitHub Pages</div>
-        <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-400">
-          <li>Crie um repositório no GitHub (ex: <code class="text-slate-200">pulsequant-terminal</code>) e envie este arquivo renomeado para <code class="text-emerald-300">index.html</code>.</li>
-          <li>No repositório, acesse <strong class="text-slate-200">Settings → Pages</strong>, selecione a branch <code class="text-slate-200">main</code> e pasta <code class="text-slate-200">/ (root)</code> e salve.</li>
-          <li>Abra o link <code class="text-sky-300">https://seu-usuario.github.io/pulsequant-terminal/</code> e informe a URL + Anon Key do Supabase acima.</li>
-        </ol>
+  using (user_id is null or auth.uid() = user_id)
+  with check (user_id is null or auth.uid() = user_id);</pre>
       </div>
     </div>
   </div>
@@ -1219,6 +1463,7 @@ create policy "Acesso por workspace_id"
     // =========================================================================
     const STORAGE_KEY = 'pulsequant_terminal_state_v2';
     const API_KEY_STORAGE = 'pulsequant_gemini_apikey_v1';
+    const API_SYNC_PREF_STORAGE = 'pulsequant_gemini_sync_pref_v1';
     const SUPABASE_CFG_STORAGE = 'pulsequant_supabase_cfg_v1';
 
     let supabaseClient = null;
@@ -1350,13 +1595,22 @@ create policy "Acesso por workspace_id"
     }
 
     // =========================================================================
-    // 2B. GESTÃO DE CHAVE API GEMINI (USO ONLINE / LOCAL)
+    // 2B. GESTÃO DE CHAVE API GEMINI + LINK MÁGICO ENTRE DISPOSITIVOS
     // =========================================================================
     function getStoredGeminiApiKey() {
       try {
         return (localStorage.getItem(API_KEY_STORAGE) || '').trim();
       } catch (_) {
         return '';
+      }
+    }
+
+    function shouldSyncGeminiKeyToCloud() {
+      try {
+        const val = localStorage.getItem(API_SYNC_PREF_STORAGE);
+        return val === null ? true : val === '1';
+      } catch (_) {
+        return true;
       }
     }
 
@@ -1375,28 +1629,37 @@ create policy "Acesso por workspace_id"
     }
 
     window.openApiKeyModal = function () {
-      const input = document.getElementById('gemini-apikey-input');
-      if (input) input.value = getStoredGeminiApiKey();
       const modal = document.getElementById('apikey-modal');
+      if (!modal) return;
+      const input = document.getElementById('gemini-apikey-input');
+      const syncChk = document.getElementById('gemini-sync-cloud');
+      if (input) input.value = getStoredGeminiApiKey();
+      if (syncChk) syncChk.checked = shouldSyncGeminiKeyToCloud();
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeApiKeyModal = function () {
       const modal = document.getElementById('apikey-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
 
     window.saveGeminiApiKey = function () {
       const val = (document.getElementById('gemini-apikey-input')?.value || '').trim();
+      const syncCloud = Boolean(document.getElementById('gemini-sync-cloud')?.checked);
       try {
+        localStorage.setItem(API_SYNC_PREF_STORAGE, syncCloud ? '1' : '0');
         if (val) localStorage.setItem(API_KEY_STORAGE, val);
         else localStorage.removeItem(API_KEY_STORAGE);
       } catch (_) {}
       updateApiKeyIndicator();
       closeApiKeyModal();
-      showToast(val ? 'Chave API Gemini salva no navegador!' : 'Chave API removida.', 'success');
+      if (supabaseClient && syncCloud) {
+        pushStateToSupabase(false);
+      }
+      showToast(val ? 'Chave API Gemini salva!' : 'Chave API removida.', 'success');
     };
 
     window.clearGeminiApiKey = function () {
@@ -1405,7 +1668,67 @@ create policy "Acesso por workspace_id"
       if (input) input.value = '';
       updateApiKeyIndicator();
       closeApiKeyModal();
-      showToast('Chave API removida do navegador.', 'info');
+      if (supabaseClient) pushStateToSupabase(false);
+      showToast('Chave API removida.', 'info');
+    };
+
+    function applyMagicHashConfigIfPresent() {
+      try {
+        const hash = window.location.hash || '';
+        if (!hash.includes('sb_url=') && !hash.includes('g_key=')) return false;
+        const params = new URLSearchParams(hash.replace(/^#/, ''));
+        const sbUrl = (params.get('sb_url') || '').trim();
+        const sbKey = (params.get('sb_key') || '').trim();
+        const ws = (params.get('ws') || 'carteira-principal').trim();
+        const gKey = (params.get('g_key') || '').trim();
+
+        if (sbUrl && sbKey) {
+          localStorage.setItem(SUPABASE_CFG_STORAGE, JSON.stringify({ url: sbUrl, anonKey: sbKey, workspaceId: ws }));
+        }
+        if (gKey) {
+          localStorage.setItem(API_KEY_STORAGE, gKey);
+        }
+        // Limpa o hash da barra de endereços por segurança visual
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        return Boolean(sbUrl && sbKey);
+      } catch (_) {
+        return false;
+      }
+    }
+
+    window.copyMagicAccessLink = function () {
+      const url = (document.getElementById('sb-url-input')?.value || getSupabaseConfig().url || '').trim();
+      const anonKey = (document.getElementById('sb-key-input')?.value || getSupabaseConfig().anonKey || '').trim();
+      const ws = (document.getElementById('sb-workspace-input')?.value || getSupabaseConfig().workspaceId || 'carteira-principal').trim();
+      const gKey = getStoredGeminiApiKey();
+
+      if (!url || !anonKey) {
+        showToast('Preencha primeiro a Project URL e Anon Key do Supabase.', 'warning');
+        return;
+      }
+
+      const params = new URLSearchParams();
+      params.set('sb_url', url);
+      params.set('sb_key', anonKey);
+      params.set('ws', ws);
+      if (gKey) params.set('g_key', gKey);
+
+      const baseUrl = window.location.href.split('#')[0];
+      const magicUrl = `${baseUrl}#${params.toString()}`;
+
+      const ta = document.createElement('textarea');
+      ta.value = magicUrl;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Link Rápido copiado! Salve nos favoritos do seu celular ou outro PC para abrir já conectado.', 'success');
+      } catch (_) {
+        showToast('Não foi possível copiar automaticamente.', 'warning');
+      }
+      document.body.removeChild(ta);
     };
 
     // =========================================================================
@@ -2103,9 +2426,11 @@ create policy "Acesso por workspace_id"
     }
 
     function buildSerializablePayload() {
+      const geminiKey = shouldSyncGeminiKeyToCloud() ? getStoredGeminiApiKey() : '';
       return {
         version: 2,
         savedAt: new Date().toISOString(),
+        geminiApiKey: geminiKey,
         calibration: state.calibration,
         autoCollect: state.autoCollect,
         macroIndicators: state.macroIndicators,
@@ -2119,6 +2444,10 @@ create policy "Acesso por workspace_id"
 
     function applyLoadedPayload(parsed) {
       if (!parsed || typeof parsed !== 'object') return false;
+      if (parsed.geminiApiKey && typeof parsed.geminiApiKey === 'string') {
+        try { localStorage.setItem(API_KEY_STORAGE, parsed.geminiApiKey.trim()); } catch (_) {}
+        updateApiKeyIndicator();
+      }
       if (parsed.calibration) state.calibration = { ...state.calibration, ...parsed.calibration };
       if (parsed.autoCollect) state.autoCollect = { ...state.autoCollect, ...parsed.autoCollect };
       state.macroIndicators = Array.isArray(parsed.macroIndicators) && parsed.macroIndicators.length > 0
@@ -2213,17 +2542,19 @@ create policy "Acesso por workspace_id"
     };
 
     window.openCloudModal = function () {
+      const modal = document.getElementById('cloud-modal');
+      if (!modal) return;
       const cfg = getSupabaseConfig();
       document.getElementById('sb-url-input').value = cfg.url;
       document.getElementById('sb-key-input').value = cfg.anonKey;
       document.getElementById('sb-workspace-input').value = cfg.workspaceId || 'carteira-principal';
-      const modal = document.getElementById('cloud-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeCloudModal = function () {
       const modal = document.getElementById('cloud-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
@@ -2250,8 +2581,11 @@ create policy "Acesso por workspace_id"
     window.disconnectSupabase = function () {
       try { localStorage.removeItem(SUPABASE_CFG_STORAGE); } catch (_) {}
       supabaseClient = null;
-      document.getElementById('sb-url-input').value = '';
-      document.getElementById('sb-key-input').value = '';
+      supabaseUser = null;
+      const urlEl = document.getElementById('sb-url-input');
+      const keyEl = document.getElementById('sb-key-input');
+      if (urlEl) urlEl.value = '';
+      if (keyEl) keyEl.value = '';
       updateCloudStatusUI('Salvo Localmente');
       closeCloudModal();
       showToast('Desconectado do Supabase. Continuando em modo local no navegador.', 'info');
@@ -3278,19 +3612,21 @@ Retorne APENAS um JSON válido:
     };
 
     window.openQuickPriceModal = function () {
+      const modal = document.getElementById('price-modal');
+      if (!modal) return;
       const asset = state.marketAssets.find((a) => a.ticker === state.selectedMarketTicker);
       if (!asset) return;
       document.getElementById('price-modal-subtitle').textContent = `${asset.ticker} • ${asset.name}`;
       document.getElementById('quick-price-input').value = asset.price;
       document.getElementById('quick-day-input').value = asset.changeDay;
       document.getElementById('quick-dy-input').value = asset.dy;
-      const modal = document.getElementById('price-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeQuickPriceModal = function () {
       const modal = document.getElementById('price-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
@@ -4249,6 +4585,8 @@ Retorne APENAS um JSON válido:
     };
 
     window.openTradeModal = function (analysisId, recIndex, clickedDateStr = null) {
+      const modal = document.getElementById('trade-modal');
+      if (!modal) return;
       const anl = state.analyses.find((a) => a.id === analysisId);
       if (!anl || !anl.recommendations[recIndex]) return;
       const rec = anl.recommendations[recIndex];
@@ -4270,13 +4608,13 @@ Retorne APENAS um JSON válido:
 
       updateTradeTimingPreview();
 
-      const modal = document.getElementById('trade-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeTradeModal = function () {
       const modal = document.getElementById('trade-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
@@ -4286,7 +4624,7 @@ Retorne APENAS um JSON válido:
       const recIndex = parseInt(document.getElementById('trade-rec-index').value, 10);
       const anl = state.analyses.find((a) => a.id === analysisId);
       const preview = document.getElementById('trade-timing-preview');
-      if (!anl || !anl.recommendations[recIndex]) return;
+      if (!anl || !anl.recommendations[recIndex] || !preview) return;
 
       const rec = anl.recommendations[recIndex];
       const buyDate = document.getElementById('trade-buy-date').value;
@@ -4380,6 +4718,8 @@ Retorne APENAS um JSON válido:
     };
 
     window.openSelectedScheduleModal = function () {
+      const modal = document.getElementById('schedule-modal');
+      if (!modal) return;
       const item = getSelectedSignalItem();
       if (!item) return;
       const { analysisId, recIndex, rec } = item;
@@ -4393,13 +4733,13 @@ Retorne APENAS um JSON válido:
       document.getElementById('sched-sell-target').value = sched.sellTargetDate;
       document.getElementById('sched-sell-limit').value = sched.sellLimitDate;
 
-      const modal = document.getElementById('schedule-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeScheduleModal = function () {
       const modal = document.getElementById('schedule-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
@@ -4824,6 +5164,8 @@ Retorne APENAS um JSON válido:
     };
 
     window.openFeedbackModal = function (analysisId, recIndex) {
+      const modal = document.getElementById('feedback-modal');
+      if (!modal) return;
       const anl = state.analyses.find((a) => a.id === analysisId);
       if (!anl || !anl.recommendations[recIndex]) return;
       const rec = anl.recommendations[recIndex];
@@ -4836,13 +5178,13 @@ Retorne APENAS um JSON válido:
       document.getElementById('modal-actual-return').value = fb.actualReturn ?? '';
       document.getElementById('modal-notes').value = fb.notes || '';
 
-      const modal = document.getElementById('feedback-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeFeedbackModal = function () {
       const modal = document.getElementById('feedback-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
@@ -4870,6 +5212,8 @@ Retorne APENAS um JSON válido:
     };
 
     window.openDetailModal = function (analysisId, recIndex) {
+      const modal = document.getElementById('detail-modal');
+      if (!modal) return;
       const anl = state.analyses.find((a) => a.id === analysisId);
       if (!anl || !anl.recommendations[recIndex]) return;
       const rec = anl.recommendations[recIndex];
@@ -4913,25 +5257,27 @@ Retorne APENAS um JSON válido:
         </div>
       `;
 
-      const modal = document.getElementById('detail-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeDetailModal = function () {
       const modal = document.getElementById('detail-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
 
     window.openResetModal = function () {
       const modal = document.getElementById('reset-modal');
+      if (!modal) return;
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeResetModal = function () {
       const modal = document.getElementById('reset-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
@@ -5088,8 +5434,6 @@ Retorne APENAS um JSON válido:
     }
 
     // =========================================================================
-    // 14. NAVEGAÇÃO ENTRE ABAS E INICIALIZAÇÃO
-    // =========================================================================
     // 14. CARTEIRA CONSOLIDADA, POSITION SIZING & CENTRAL DE ALERTAS
     // =========================================================================
     function generateSmartAlerts() {
@@ -5097,7 +5441,7 @@ Retorne APENAS um JSON válido:
       const alerts = [];
       const allSignals = getAllSignalsFlattened();
 
-      allSignals.forEach(({ analysis, rec, analysisId, recIndex }) => {
+      allSignals.forEach(({ rec, analysisId, recIndex }) => {
         const sched = rec.schedule || buildDefaultSchedule(rec.horizon);
         const info = getDayRiskInfo(today, sched);
         const trade = rec.userTrade;
@@ -5153,6 +5497,8 @@ Retorne APENAS um JSON válido:
     }
 
     window.openAlertsModal = function () {
+      const modal = document.getElementById('alerts-modal');
+      if (!modal) return;
       const alerts = generateSmartAlerts();
       const container = document.getElementById('alerts-modal-list');
       if (alerts.length === 0) {
@@ -5177,13 +5523,13 @@ Retorne APENAS um JSON válido:
           `;
         }).join('');
       }
-      const modal = document.getElementById('alerts-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     };
 
     window.closeAlertsModal = function () {
       const modal = document.getElementById('alerts-modal');
+      if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     };
@@ -5331,7 +5677,6 @@ Retorne APENAS um JSON válido:
         tbody.innerHTML = rowsHtml || `<tr><td colspan="7" class="py-8 text-center text-slate-400">Nenhuma compra registrada ainda. Clique em qualquer dia verde do calendário no Dashboard para adicionar sua primeira operação.</td></tr>`;
       }
 
-      // Renderiza gráfico doughnut de alocação
       const allocCanvas = document.getElementById('portfolioAllocChart');
       if (allocCanvas) {
         if (portfolioAllocChartInstance) portfolioAllocChartInstance.destroy();
@@ -5429,6 +5774,7 @@ Retorne APENAS um JSON válido:
     }
 
     async function bootstrapApp() {
+      const configuredFromMagicLink = applyMagicHashConfigIfPresent();
       loadFromBrowserStorage();
       initSupabaseClient();
       updateApiKeyIndicator();
@@ -5443,7 +5789,7 @@ Retorne APENAS um JSON válido:
           supabaseUser = data?.user || null;
           updateCloudStatusUI();
         } catch (_) {}
-        await pullStateFromSupabase(false);
+        await pullStateFromSupabase(configuredFromMagicLink);
       }
     }
 
